@@ -9,7 +9,8 @@ export default async function Home() {
 
     return (
         <div>
-            <pre>{JSON.stringify(users, null, 2)}</pre>
+            <h1>Home Page</h1>
+            {/* <pre>{JSON.stringify(users, null, 2)}</pre> */}
         </div>
     );
 }
