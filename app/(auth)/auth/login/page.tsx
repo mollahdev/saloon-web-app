@@ -15,7 +15,7 @@ import {
 } from '@mantine/core';
 import { schemaResolver, useForm } from '@mantine/form';
 import Link from 'next/link';
-import { ProjectData } from '@/constants';
+import { projectData } from '@/constants';
 
 import { loginSchema, type LoginFormValues } from './schema';
 
@@ -40,7 +40,7 @@ export default function LoginPage() {
                 {/* Heading */}
                 <Stack gap={4} mb="xl">
                     <Title order={1} ta="center" fz={{ base: 'xl', sm: '2xl' }}>
-                        {ProjectData.title}
+                        {projectData.title}
                     </Title>
                     <Text c="dimmed" ta="center" fz="sm">
                         Sign in to continue to your account

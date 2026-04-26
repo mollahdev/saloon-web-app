@@ -1,9 +1,9 @@
-import { db } from '@/app/lib/db';
+import { prisma } from '@/app/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-    const users = await db.user.findMany();
+    const users = await prisma.user.findMany();
 
     // console.log(users);
 
