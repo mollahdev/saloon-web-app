@@ -1,5 +1,4 @@
 'use client';
-
 import {
     Anchor,
     Box,
@@ -15,14 +14,23 @@ import {
 } from '@mantine/core';
 import { schemaResolver, useForm } from '@mantine/form';
 import Link from 'next/link';
+import { useEffect } from 'react';
+/**
+ * Internal dependencies
+ */
 import { projectData } from '@/constants';
-import { useAppSelector } from '@/app/lib/store';
+import { useAppDispatch, useAppSelector } from '@/app/lib/store';
 import { selectisDefaultUserGenerated } from '@/app/lib/store/auth-slice/auth-slice';
-
+import { generateDefaultUserAction } from '@/app/lib/store/auth-slice/auth-action';
 import { loginSchema, type LoginFormValues } from './schema';
 
 export default function LoginPage() {
+    const dispatch = useAppDispatch();
     const isDefaultUserGenerated = useAppSelector(selectisDefaultUserGenerated);
+
+    useEffect(() => {
+        dispatch(generateDefaultUserAction());
+    }, [dispatch]);
 
     const form = useForm<LoginFormValues>({
         mode: 'uncontrolled',

@@ -22,9 +22,9 @@ const authSlice = createSlice({
         builder.addCase(generateDefaultUserAction.pending, (state) => {
             state.status = 'loading';
         });
-        builder.addCase(generateDefaultUserAction.fulfilled, (state) => {
+        builder.addCase(generateDefaultUserAction.fulfilled, (state, action: any) => {
             state.status = 'succeeded';
-            state.isDefaultUserGenerated = true;
+            state.isDefaultUserGenerated = action.payload;
         });
         builder.addCase(generateDefaultUserAction.rejected, (state) => {
             state.status = 'failed';
