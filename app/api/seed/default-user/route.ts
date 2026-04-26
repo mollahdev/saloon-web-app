@@ -17,7 +17,6 @@ export async function GET() {
         update: {
             passwordHash: hashedPassword,
         },
-
         create: {
             name: 'Admin',
             email: OWNER_EMAIL,

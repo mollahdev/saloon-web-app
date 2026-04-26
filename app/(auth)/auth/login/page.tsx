@@ -16,10 +16,14 @@ import {
 import { schemaResolver, useForm } from '@mantine/form';
 import Link from 'next/link';
 import { projectData } from '@/constants';
+import { useAppSelector } from '@/app/lib/store';
+import { selectisDefaultUserGenerated } from '@/app/lib/store/auth-slice/auth-slice';
 
 import { loginSchema, type LoginFormValues } from './schema';
 
 export default function LoginPage() {
+    const isDefaultUserGenerated = useAppSelector(selectisDefaultUserGenerated);
+
     const form = useForm<LoginFormValues>({
         mode: 'uncontrolled',
         initialValues: {
@@ -41,6 +45,7 @@ export default function LoginPage() {
                 <Stack gap={4} mb="xl">
                     <Title order={1} ta="center" fz={{ base: 'xl', sm: '2xl' }}>
                         {projectData.title}
+                        {isDefaultUserGenerated && ' 🎉'}
                     </Title>
                     <Text c="dimmed" ta="center" fz="sm">
                         Sign in to continue to your account
