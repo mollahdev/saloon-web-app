@@ -1,9 +1,12 @@
-'use clients';
 import type { PropsWithChildren } from 'react';
 import { redirect } from 'next/navigation';
+import { getSession } from '@/app/lib/auth';
+import { isEmpty } from 'lodash';
 
-export default function AdminLayout(props: PropsWithChildren) {
-    if (true) {
+export default async function AdminLayout(props: PropsWithChildren) {
+    const session = await getSession();
+
+    if (isEmpty(session)) {
         redirect('auth/login');
     }
 

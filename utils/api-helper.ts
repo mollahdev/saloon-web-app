@@ -1,6 +1,10 @@
 import axios, { AxiosError, type AxiosResponse } from 'axios';
-import { clearData } from '@/app/lib/store/auth-slice/auth-slice';
-import { store } from '@/app/lib/store';
+
+let store: any;
+
+export const injectStore = (_store: any) => {
+    store = _store;
+};
 
 const API = axios.create({
     baseURL: '/',
@@ -15,7 +19,7 @@ const API = axios.create({
 API.interceptors.request.use(
     async function (config) {
         const state = store?.getState();
-        const accessToken = state.auth.accessToken;
+        const accessToken = state?.auth.accessToken;
         if (accessToken) {
             config.headers.Authorization = 'Bearer ' + accessToken;
         }
@@ -33,7 +37,7 @@ API.interceptors.response.use(
     function (error: AxiosError) {
         const code = error.response?.status as number;
         if ([401].includes(code)) {
-            store?.dispatch(clearData());
+            store?.dispatch({ type: 'auth/clearData' });
         }
         return Promise.reject(error);
     }

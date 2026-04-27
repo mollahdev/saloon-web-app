@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 /**
  * Internal dependencies
  */
-import { getGenerateDefaultUserApi, getLoginApi } from './auth-api';
+import { getGenerateDefaultUserApi, getLoginApi, getLogoutApi } from './auth-api';
 import type { LoginPayload } from '@/models/auth';
 import type { KnownError } from '@/models';
 
@@ -42,3 +42,16 @@ export const loginAction = createAsyncThunk(
         }
     }
 );
+
+export const logoutAction = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
+    try {
+        await getLogoutApi();
+        return true;
+    } catch (err) {
+        const error: AxiosError<KnownError> = err as any;
+        if (!error.response) {
+            throw err;
+        }
+        return rejectWithValue(error.response.data.message);
+    }
+});

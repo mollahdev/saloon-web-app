@@ -1,11 +1,17 @@
 import '@mantine/core/styles.css';
-import './globals.css';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
+import { cookies } from 'next/headers';
+/**
+ * Internal dependency
+ */
+import './globals.css';
 import { projectData } from '@/constants';
 import StoreProvider from '@/components/store-provider';
 import ToasterProvider from '@/components/toaster-provider';
+import ValueProvider from '@/components/value-provider';
+import { theme } from '@/app/lib/theme';
 
 export const metadata: Metadata = {
     title: `${projectData.title} - Professional Haircuts & Shaves in New York`,
@@ -22,11 +28,14 @@ const geistMono = Geist_Mono({
     subsets: ['latin'],
 });
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('access_token')?.value || '';
+
     return (
         <html lang="en" {...mantineHtmlProps}>
             <head>
@@ -34,8 +43,9 @@ export default function RootLayout({
             </head>
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <StoreProvider>
-                    <MantineProvider>
+                    <MantineProvider theme={theme}>
                         <ToasterProvider />
+                        <ValueProvider accessToken={accessToken} />
                         {children}
                     </MantineProvider>
                 </StoreProvider>

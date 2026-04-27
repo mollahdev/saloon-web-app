@@ -15,6 +15,7 @@ import {
 import { schemaResolver, useForm } from '@mantine/form';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 /**
  * Internal dependencies
  */
@@ -27,6 +28,7 @@ import { loginSchema, type LoginFormValues } from '@/app/lib/validation/auth';
 export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useAppDispatch();
+    const router = useRouter();
     const isDefaultUserGenerated = useAppSelector(selectisDefaultUserGenerated);
 
     useEffect(() => {
@@ -44,9 +46,14 @@ export default function LoginPage() {
 
     const handleSubmit = (values: LoginFormValues) => {
         setIsLoading(true);
-        dispatch(loginAction(values)).finally(() => {
-            setIsLoading(false);
-        });
+        dispatch(loginAction(values))
+            .unwrap()
+            .then(() => {
+                router.push('/admin');
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     };
 
     return (

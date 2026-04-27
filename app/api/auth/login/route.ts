@@ -2,6 +2,7 @@ import { prisma } from '@/app/lib/db';
 import { NextResponse } from 'next/server';
 import { loginSchema } from '@/app/lib/validation/auth';
 import bcrypt from 'bcryptjs';
+import { generatePermanentToken } from '@/app/lib/auth';
 
 export async function POST(request: Request) {
     const body = await request.json();
@@ -43,11 +44,24 @@ export async function POST(request: Request) {
         );
     }
 
-    return NextResponse.json({
+    const accessToken = await generatePermanentToken({
+        userId: user.id,
+        role: user.role,
+    });
+
+    const response = NextResponse.json({
         message: 'login successful',
         data: {
-            accessToken: '',
-            body: val.data,
+            accessToken: accessToken,
         },
     });
+
+    response.cookies.set('access_token', accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        path: '/',
+    });
+
+    return response;
 }

@@ -9,3 +9,7 @@ export async function getGenerateDefaultUserApi() {
 export async function getLoginApi(payload: LoginPayload): ApiResponse<Login> {
     return APIHelper.post(`/api/auth/login`, payload);
 }
+
+export async function getLogoutApi() {
+    return APIHelper.get(`/api/auth/logout`);
+}
