@@ -14,17 +14,18 @@ import {
 } from '@mantine/core';
 import { schemaResolver, useForm } from '@mantine/form';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 /**
  * Internal dependencies
  */
 import { projectData } from '@/constants';
 import { useAppDispatch, useAppSelector } from '@/app/lib/store';
 import { selectisDefaultUserGenerated } from '@/app/lib/store/auth-slice/auth-slice';
-import { generateDefaultUserAction } from '@/app/lib/store/auth-slice/auth-action';
-import { loginSchema, type LoginFormValues } from './schema';
+import { generateDefaultUserAction, loginAction } from '@/app/lib/store/auth-slice/auth-action';
+import { loginSchema, type LoginFormValues } from '@/app/lib/validation/auth';
 
 export default function LoginPage() {
+    const [isLoading, setIsLoading] = useState(false);
     const dispatch = useAppDispatch();
     const isDefaultUserGenerated = useAppSelector(selectisDefaultUserGenerated);
 
@@ -42,8 +43,10 @@ export default function LoginPage() {
     });
 
     const handleSubmit = (values: LoginFormValues) => {
-        // TODO: wire up authentication
-        console.log(values);
+        setIsLoading(true);
+        dispatch(loginAction(values)).finally(() => {
+            setIsLoading(false);
+        });
     };
 
     return (
@@ -103,7 +106,14 @@ export default function LoginPage() {
                             <Divider />
 
                             {/* Submit */}
-                            <Button id="login-submit" type="submit" fullWidth size="md">
+                            <Button
+                                id="login-submit"
+                                type="submit"
+                                fullWidth
+                                size="md"
+                                loading={isLoading}
+                                loaderProps={{ type: 'dots' }}
+                            >
                                 Sign in
                             </Button>
                         </Stack>

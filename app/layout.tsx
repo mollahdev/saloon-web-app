@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
 import { projectData } from '@/constants';
 import StoreProvider from '@/components/store-provider';
+import ToasterProvider from '@/components/toaster-provider';
 
 export const metadata: Metadata = {
     title: `${projectData.title} - Professional Haircuts & Shaves in New York`,
@@ -33,7 +34,10 @@ export default function RootLayout({
             </head>
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <StoreProvider>
-                    <MantineProvider>{children}</MantineProvider>
+                    <MantineProvider>
+                        <ToasterProvider />
+                        {children}
+                    </MantineProvider>
                 </StoreProvider>
             </body>
         </html>

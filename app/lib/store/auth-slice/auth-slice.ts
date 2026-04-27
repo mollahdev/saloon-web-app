@@ -1,6 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { RootState } from '@/app/lib/store';
-import { generateDefaultUserAction } from './auth-action';
+import { generateDefaultUserAction, loginAction } from './auth-action';
+import type { Login } from '@/models/auth';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
 const initialState = {
     accessToken: '',
@@ -29,6 +31,17 @@ const authSlice = createSlice({
         builder.addCase(generateDefaultUserAction.rejected, (state) => {
             state.status = 'failed';
             state.isDefaultUserGenerated = false;
+        });
+        builder.addCase(loginAction.pending, (state) => {
+            state.status = 'loading';
+        });
+        builder.addCase(loginAction.fulfilled, (state, action: PayloadAction<Login>) => {
+            state.status = 'succeeded';
+            state.accessToken = action.payload.accessToken;
+        });
+        builder.addCase(loginAction.rejected, (state) => {
+            state.status = 'failed';
+            state.accessToken = '';
         });
     },
 });
