@@ -1,0 +1,65 @@
+'use client';
+import { Avatar, Menu, UnstyledButton } from '@mantine/core';
+import { CiUser } from 'react-icons/ci';
+import Link from 'next/link';
+import { IoExitOutline } from 'react-icons/io5';
+import { useState } from 'react';
+import { useAppDispatch } from '@/app/lib/store';
+import { logoutAction } from '@/app/lib/store/auth-slice/auth-action';
+
+export default function Profile() {
+    const [isLoading, setIsLoading] = useState(false);
+    const dispatch = useAppDispatch();
+
+    const handleLogout = () => {
+        setIsLoading(true);
+        dispatch(logoutAction())
+            .unwrap()
+            .then(() => {
+                setIsLoading(false);
+                // reload
+                window.location.reload();
+            })
+            .catch(() => {
+                setIsLoading(false);
+            });
+    };
+
+    return (
+        <div className="mr-4 mt-1.5">
+            <Menu width={180} shadow="md" position="bottom-end" offset={10}>
+                <Menu.Target>
+                    <UnstyledButton
+                        style={{
+                            padding: '0',
+                            color: 'var(--mantine-color-text)',
+                            borderRadius: 'var(--mantine-radius-sm)',
+                        }}
+                    >
+                        <Avatar
+                            className="border border-primary/10"
+                            src="https://static.vecteezy.com/system/resources/previews/052/523/015/non_2x/3d-icon-avatar-cartoon-character-smiling-man-learning-people-close-up-portrait-on-isolated-on-transparent-background-png.png"
+                            radius="xl"
+                        />
+                    </UnstyledButton>
+                </Menu.Target>
+                <Menu.Dropdown>
+                    <Link href={'/admin/profile'}>
+                        <Menu.Item>
+                            <div className="flex items-center gap-2 h-6">
+                                <CiUser size={18} />
+                                Profile
+                            </div>
+                        </Menu.Item>
+                    </Link>
+                    <Menu.Item onClick={handleLogout} disabled={isLoading}>
+                        <div className="flex items-center gap-2 h-6 text-red-700">
+                            <IoExitOutline size={18} />
+                            {isLoading ? 'Logging out...' : 'Logout'}
+                        </div>
+                    </Menu.Item>
+                </Menu.Dropdown>
+            </Menu>
+        </div>
+    );
+}

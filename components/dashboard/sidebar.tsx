@@ -23,10 +23,10 @@ export default function AdminSidebar(props: PropsWithChildren) {
 
     // Auto-close sidebar on mobile when navigating to a new page
     useEffect(() => {
-        if (sidebarExpanded && device === 'mobile') {
+        if (device === 'mobile') {
             dispatch(setSidebarExpanded(false));
         }
-    }, [pathname, device, dispatch, sidebarExpanded]);
+    }, [pathname, device, dispatch]);
 
     const wrapperClasses = classNames(['flex h-screen w-full relative overflow-hidden']);
 
