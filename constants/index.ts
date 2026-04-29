@@ -1,5 +1,8 @@
+import icon from '@/app/icon.png';
+
 export const projectData = {
     title: 'Big Apple Barbers',
+    icon: icon,
 } as const;
 
 export const passwordSaltRounds = 10;

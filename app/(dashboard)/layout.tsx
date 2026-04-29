@@ -14,8 +14,8 @@ export default async function AdminLayout(props: PropsWithChildren) {
     return (
         <AdminSidebar>
             <div className="flex flex-col">
-                <div className="h-16 bg-gray-100">YYY</div>
-                <div className="grow overflow-y-auto h-[calc(100vh-64px)] p-4">
+                <div className="h-14 bg-white">YYY</div>
+                <div className="grow overflow-y-auto bg-gray-100 h-[calc(100vh-56px)] p-4">
                     {props.children}
                 </div>
             </div>

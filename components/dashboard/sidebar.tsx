@@ -1,11 +1,15 @@
 'use client';
 import type { PropsWithChildren } from 'react';
 import classNames from 'classnames';
+import Image from 'next/image';
+import { FaBeer } from 'react-icons/fa';
+
 /**
  * Internal dependency
  */
 import { useAppSelector, useAppDispatch } from '@/app/lib/store';
 import { selectSidebarExpanded, setSidebarExpanded } from '@/app/lib/store/ui-slice/ui-slice';
+import { projectData } from '@/constants';
 
 export default function AdminSidebar(props: PropsWithChildren) {
     const dispatch = useAppDispatch();
@@ -23,12 +27,32 @@ export default function AdminSidebar(props: PropsWithChildren) {
         },
     ]);
 
+    const headerClasses = classNames([
+        'h-14 flex items-center justify-center flex-col',
+        {
+            'bg-linear-to-r from-primary/50 to-primary': sidebarExpanded,
+            'bg-white border-r border-gray-200': !sidebarExpanded,
+        },
+    ]);
+
     return (
         <div className={wrapperClasses}>
             <div className="bg-dark800">
-                XXX
+                <div className={headerClasses}>
+                    {sidebarExpanded ? (
+                        <span className="text-white font-semibold text-base text-nowrap">
+                            {projectData.title}
+                        </span>
+                    ) : (
+                        <Image
+                            src={projectData.icon}
+                            alt={projectData.title}
+                            className="w-12 h-12"
+                        />
+                    )}
+                </div>
                 <button className="cursor-pointer" onClick={toggleSidebar}>
-                    Toggle
+                    Toggle <FaBeer />
                 </button>
             </div>
             {props.children}
