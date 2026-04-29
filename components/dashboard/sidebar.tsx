@@ -1,52 +1,63 @@
 'use client';
 import type { PropsWithChildren } from 'react';
 import classNames from 'classnames';
-import Image from 'next/image';
-
+import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 /**
  * Internal dependency
  */
-import { useAppSelector } from '@/app/lib/store';
-import { selectSidebarExpanded } from '@/app/lib/store/ui-slice/ui-slice';
-import { projectData } from '@/constants';
+import { useAppSelector, useAppDispatch } from '@/app/lib/store';
+import {
+    selectSidebarExpanded,
+    setSidebarExpanded,
+    selectDevice,
+} from '@/app/lib/store/ui-slice/ui-slice';
+import SidebarLogo from './sidebar-logo';
+import SidebarMenu from './sidebar-menu';
 
 export default function AdminSidebar(props: PropsWithChildren) {
+    const dispatch = useAppDispatch();
     const sidebarExpanded = useAppSelector(selectSidebarExpanded);
+    const device = useAppSelector(selectDevice);
+    const pathname = usePathname();
 
-    const wrapperClasses = classNames([
-        'grid h-screen transition-all duration-300',
-        {
-            'grid-cols-[75px_1fr]': !sidebarExpanded,
-            'grid-cols-[220px_1fr]': sidebarExpanded,
-        },
-    ]);
+    // Auto-close sidebar on mobile when navigating to a new page
+    useEffect(() => {
+        if (sidebarExpanded && device === 'mobile') {
+            dispatch(setSidebarExpanded(false));
+        }
+    }, [pathname, device, dispatch, sidebarExpanded]);
 
-    const headerClasses = classNames([
-        'h-14 flex items-center justify-center flex-col',
+    const wrapperClasses = classNames(['flex h-screen w-full relative overflow-hidden']);
+
+    const sidebarClasses = classNames([
+        'bg-dark800 h-full shrink-0 transition-all duration-300 z-50',
+        'absolute md:relative',
         {
-            'bg-linear-to-r from-primary/50 to-primary': sidebarExpanded,
-            'bg-white border-r border-gray-200': !sidebarExpanded,
+            'w-[70px]': !sidebarExpanded,
+            'w-[220px]': sidebarExpanded,
         },
     ]);
 
     return (
         <div className={wrapperClasses}>
-            <div className="bg-dark800">
-                <div className={headerClasses}>
-                    {sidebarExpanded ? (
-                        <span className="text-white font-semibold text-base text-nowrap">
-                            {projectData.title}
-                        </span>
-                    ) : (
-                        <Image
-                            src={projectData.icon}
-                            alt={projectData.title}
-                            className="w-12 h-12"
-                        />
-                    )}
-                </div>
+            {/* Mobile Backdrop Overlay - allows closing sidebar when floating over content */}
+            {sidebarExpanded && (
+                <div
+                    className="fixed inset-0 bg-black/20 z-40 md:hidden backdrop-blur-[2px]"
+                    onClick={() => dispatch(setSidebarExpanded(false))}
+                    aria-label="Close sidebar"
+                />
+            )}
+
+            <div className={sidebarClasses}>
+                <SidebarLogo />
+                <SidebarMenu />
             </div>
-            {props.children}
+
+            <div className="flex-1 min-w-0 h-full ml-[70px] md:ml-0 transition-none flex flex-col">
+                {props.children}
+            </div>
         </div>
     );
 }

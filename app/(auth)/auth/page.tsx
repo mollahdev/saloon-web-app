@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import { redirect, RedirectType } from 'next/navigation';
 
 export default function AuthIndexPage() {
-    redirect('/auth/login');
+    redirect('/auth/login', RedirectType.replace);
 }
