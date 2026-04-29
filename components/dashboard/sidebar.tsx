@@ -2,22 +2,16 @@
 import type { PropsWithChildren } from 'react';
 import classNames from 'classnames';
 import Image from 'next/image';
-import { FaBeer } from 'react-icons/fa';
 
 /**
  * Internal dependency
  */
-import { useAppSelector, useAppDispatch } from '@/app/lib/store';
-import { selectSidebarExpanded, setSidebarExpanded } from '@/app/lib/store/ui-slice/ui-slice';
+import { useAppSelector } from '@/app/lib/store';
+import { selectSidebarExpanded } from '@/app/lib/store/ui-slice/ui-slice';
 import { projectData } from '@/constants';
 
 export default function AdminSidebar(props: PropsWithChildren) {
-    const dispatch = useAppDispatch();
     const sidebarExpanded = useAppSelector(selectSidebarExpanded);
-
-    const toggleSidebar = () => {
-        dispatch(setSidebarExpanded(!sidebarExpanded));
-    };
 
     const wrapperClasses = classNames([
         'grid h-screen transition-all duration-300',
@@ -51,9 +45,6 @@ export default function AdminSidebar(props: PropsWithChildren) {
                         />
                     )}
                 </div>
-                <button className="cursor-pointer" onClick={toggleSidebar}>
-                    Toggle <FaBeer />
-                </button>
             </div>
             {props.children}
         </div>
