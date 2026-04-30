@@ -9,6 +9,7 @@ import AdminSidebar from '@/components/dashboard/sidebar';
 import CollapseButton from '@/components/dashboard/collapse-btn';
 import Profile from '@/components/dashboard/profile';
 import Notification from '@/components/dashboard/notification';
+import DashboardPageTitle from '@/components/dashboard/dashboard-page-title';
 
 export default async function AdminLayout(props: PropsWithChildren) {
     const session = await getSession();
@@ -21,7 +22,10 @@ export default async function AdminLayout(props: PropsWithChildren) {
         <AdminSidebar>
             <div className="flex flex-col">
                 <div className="h-14 bg-white flex justify-between items-center">
-                    <CollapseButton />
+                    <div className="flex items-center gap-4">
+                        <CollapseButton />
+                        <DashboardPageTitle />
+                    </div>
                     <div className="flex items-center gap-5">
                         <Notification />
                         <Profile />

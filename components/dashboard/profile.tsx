@@ -6,7 +6,7 @@ import { IoExitOutline } from 'react-icons/io5';
 import { useState } from 'react';
 import { useAppDispatch } from '@/app/lib/store';
 import { logoutAction } from '@/app/lib/store/auth-slice/auth-action';
-
+import { IoSettingsOutline } from 'react-icons/io5';
 export default function Profile() {
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useAppDispatch();
@@ -43,7 +43,7 @@ export default function Profile() {
                         />
                     </UnstyledButton>
                 </Menu.Target>
-                <Menu.Dropdown>
+                <Menu.Dropdown className="grid gap-1">
                     <Link href={'/admin/profile'}>
                         <Menu.Item>
                             <div className="flex items-center gap-2 h-6">
@@ -52,12 +52,24 @@ export default function Profile() {
                             </div>
                         </Menu.Item>
                     </Link>
-                    <Menu.Item onClick={handleLogout} disabled={isLoading}>
-                        <div className="flex items-center gap-2 h-6 text-red-700">
+                    <Link href={'/admin/settings'}>
+                        <Menu.Item>
+                            <div className="flex items-center gap-2 h-6">
+                                <IoSettingsOutline size={18} />
+                                Settings
+                            </div>
+                        </Menu.Item>
+                    </Link>
+                    <button
+                        onClick={handleLogout}
+                        disabled={isLoading}
+                        className="w-full px-3 py-2 rounded-md bg-red-50 hover:bg-red-100 cursor-pointer transition-colors duration-200"
+                    >
+                        <div className="flex text-sm font-semibold items-center gap-2 h-6 text-red-700">
                             <IoExitOutline size={18} />
                             {isLoading ? 'Logging out...' : 'Logout'}
                         </div>
-                    </Menu.Item>
+                    </button>
                 </Menu.Dropdown>
             </Menu>
         </div>
