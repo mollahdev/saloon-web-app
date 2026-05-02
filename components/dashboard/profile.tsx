@@ -1,12 +1,14 @@
 'use client';
 import { Avatar, Menu, UnstyledButton } from '@mantine/core';
-import { CiUser } from 'react-icons/ci';
+import { CiCircleInfo } from 'react-icons/ci';
 import Link from 'next/link';
 import { IoExitOutline } from 'react-icons/io5';
 import { useState } from 'react';
 import { useAppDispatch } from '@/app/lib/store';
 import { logoutAction } from '@/app/lib/store/auth-slice/auth-action';
-import { IoSettingsOutline } from 'react-icons/io5';
+import { CiLock } from 'react-icons/ci';
+import { CiStopwatch } from 'react-icons/ci';
+
 export default function Profile() {
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useAppDispatch();
@@ -47,16 +49,24 @@ export default function Profile() {
                     <Link href={'/admin/profile'}>
                         <Menu.Item>
                             <div className="flex items-center gap-2 h-6">
-                                <CiUser size={18} />
-                                Profile
+                                <CiCircleInfo size={18} />
+                                My Profile Info
+                            </div>
+                        </Menu.Item>
+                    </Link>
+                    <Link href={'/admin/working-hours'}>
+                        <Menu.Item>
+                            <div className="flex items-center gap-2 h-6">
+                                <CiStopwatch size={18} />
+                                Working Hours
                             </div>
                         </Menu.Item>
                     </Link>
                     <Link href={'/admin/settings'}>
                         <Menu.Item>
                             <div className="flex items-center gap-2 h-6">
-                                <IoSettingsOutline size={18} />
-                                Settings
+                                <CiLock size={18} />
+                                Change Password
                             </div>
                         </Menu.Item>
                     </Link>

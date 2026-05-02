@@ -3,6 +3,9 @@ model User {
   name         String   @db.VarChar(255)
   email        String   @unique @db.VarChar(255)
   phone        String?  @db.VarChar(20)
+  address      String?  @db.VarChar(500)
+  position     String   @db.VarChar(500) @default("Barber/Stylist")
+  bio          String?  @db.VarChar(500)
   avatar       String?  @db.VarChar(500)
   role         Role     @default(MEMBER)
   status       Status   @default(PENDING_VERIFICATION)
@@ -10,6 +13,8 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
   otps         Otp[]
+  skills       Skill[]
+  workingHours WorkingHour[]
 
   @@map("users")
 }

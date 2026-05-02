@@ -1,6 +1,6 @@
 import { PrismaClient } from '@/generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
-import { dbUrl } from '@/constants';
+import { dbUrl } from '@/constants/db';
 
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;

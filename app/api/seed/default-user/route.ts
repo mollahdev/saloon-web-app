@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/app/lib/db';
-import bcrypt from 'bcryptjs';
-import { passwordSaltRounds } from '@/constants';
+import { generateDefaultUser } from '@/repositories/default-user';
 
 export async function GET() {
     const OWNER_EMAIL = process.env.OWNER_EMAIL;
@@ -11,19 +9,9 @@ export async function GET() {
         return NextResponse.json({ message: 'Default defined' }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash(OWNER_PASSWORD, passwordSaltRounds);
-    await prisma.user.upsert({
-        where: { email: OWNER_EMAIL },
-        update: {
-            passwordHash: hashedPassword,
-        },
-        create: {
-            name: 'Admin',
-            email: OWNER_EMAIL,
-            passwordHash: hashedPassword,
-            status: 'LOCKED',
-            role: 'OWNER',
-        },
+    await generateDefaultUser({
+        email: OWNER_EMAIL,
+        password: OWNER_PASSWORD,
     });
 
     return NextResponse.json({ message: `✅ Default owner is ready.` });

@@ -7,25 +7,10 @@ export const profileSchema = z.object({
     phone: z.string().optional(),
     address: z.string().optional(),
     bio: z.string().optional(),
-    role: z.enum(['owner', 'admin', 'member']).optional(),
-    status: z.enum(['active', 'inactive']).optional(),
-    specialties: z
-        .array(
-            z.object({
-                name: z.string(),
-                isGood: z.boolean(),
-            })
-        )
-        .optional(),
-    workingHours: z.array(
-        z.object({
-            isActive: z.boolean(),
-            isFullDay: z.boolean(),
-            startTime: z.string(),
-            endTime: z.string(),
-            day: z.string(),
-        })
-    ),
+    role: z.enum(['OWNER', 'ADMIN', 'MEMBER']).default('MEMBER'),
+    status: z
+        .enum(['ACTIVE', 'LOCKED', 'INACTIVE', 'PENDING_VERIFICATION'])
+        .default('PENDING_VERIFICATION'),
 });
 
 export type ProfileValues = z.infer<typeof profileSchema>;

@@ -4,7 +4,6 @@ import { CiCalendar } from 'react-icons/ci';
 import { LuScissors } from 'react-icons/lu';
 import { RiCoupon2Line } from 'react-icons/ri';
 import { RxPeople } from 'react-icons/rx';
-import { LuTimerOff } from 'react-icons/lu';
 import { GoDatabase } from 'react-icons/go';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -38,11 +37,6 @@ export default function SidebarMenu() {
             name: 'Staffs',
             icon: <RxPeople size={20} />,
             slug: '/admin/staffs',
-        },
-        {
-            name: 'Time Off',
-            icon: <LuTimerOff size={20} />,
-            slug: '/admin/time-off',
         },
         {
             name: 'Customers',

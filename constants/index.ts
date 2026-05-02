@@ -5,7 +5,24 @@ export const projectData = {
     icon: icon,
 } as const;
 
+export const timezones = 'America/New_York';
 export const passwordSaltRounds = 10;
 
-const { DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME } = process.env;
-export const dbUrl = `mysql://${DB_USER}:${encodeURIComponent(DB_PASSWORD ?? '')}@${DB_HOST}:${DB_PORT}/${DB_NAME}?allowPublicKeyRetrieval=true`;
+export const workingDayOptions = [
+    'SUNDAY',
+    'MONDAY',
+    'TUESDAY',
+    'WEDNESDAY',
+    'THURSDAY',
+    'FRIDAY',
+    'SATURDAY',
+] as const;
+
+export const defaultWorkingHours = workingDayOptions.map((day) => {
+    return {
+        dayOfWeek: day,
+        isOffDay: false,
+        startTime: '10:00:00',
+        endTime: '19:00:00',
+    };
+});
