@@ -1,15 +1,21 @@
 'use client';
 import { Button, Divider, TextInput, Textarea, Select, Switch } from '@mantine/core';
 import { useEffect } from 'react';
-import ProfileLoading from './loading';
 import { schemaResolver, useForm } from '@mantine/form';
+import toast from 'react-hot-toast';
+/**
+ * Internal dependencies
+ */
+import ProfileLoading from './loading';
 import { profileSchema, ProfileValues } from '@/app/lib/validation/profile';
 import { PageTitle } from '@/utils/portal';
-import { useGetProfileQuery } from '@/app/lib/store/profile/api';
+import { useGetProfileQuery, useUpdateProfileMutation } from '@/app/lib/store/profile/api';
+import { ROLE, STATUS } from '@/constants';
 
 export default function ProfilePage() {
     const { data: profileResponse, isLoading, error } = useGetProfileQuery();
     const profile = profileResponse?.data;
+    const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
 
     const form = useForm<ProfileValues>({
         initialValues: {
@@ -38,20 +44,23 @@ export default function ProfilePage() {
         }
     }, [profile]);
 
-    if (isLoading || error) {
+    if (isLoading || error || !profile) {
         return <ProfileLoading />;
     }
 
-    const handleSubmit = (values: ProfileValues) => {
-        console.log('🚀 ~ ProfilePage ~ handleSubmit ~ values:', values);
+    const handleSubmit = async (values: ProfileValues) => {
+        try {
+            const response = await updateProfile(values).unwrap();
+            toast.success(response.message);
+        } catch {}
     };
 
     return (
         <>
             <PageTitle.Source>Profile</PageTitle.Source>
-            <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                 <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
+                    <div className="grid grid-cols-1 items-center md:grid-cols-2 gap-6 pb-4">
                         <TextInput
                             id="profile-name"
                             label="Name"
@@ -101,30 +110,34 @@ export default function ProfilePage() {
                             />
                         </div>
 
-                        <Select
-                            id="profile-role"
-                            label="Role"
-                            placeholder="Select role"
-                            size="md"
-                            data={[
-                                { value: 'ADMIN', label: 'Admin' },
-                                { value: 'MEMBER', label: 'Member' },
-                            ]}
-                            key={form.key('role')}
-                            {...form.getInputProps('role')}
-                        />
+                        {profile.role !== ROLE.OWNER && (
+                            <Select
+                                id="profile-role"
+                                label="Role"
+                                placeholder="Select role"
+                                size="md"
+                                data={[
+                                    { value: 'ADMIN', label: 'Admin' },
+                                    { value: 'MEMBER', label: 'Member' },
+                                ]}
+                                key={form.key('role')}
+                                {...form.getInputProps('role')}
+                            />
+                        )}
 
-                        <div className="flex items-center pt-6">
+                        <div className="md:mt-6">
                             <Switch
                                 id="profile-status"
                                 label="Active Account"
                                 size="md"
                                 key={form.key('status')}
-                                checked={form.values.status === 'ACTIVE'}
+                                checked={form.values.status === STATUS.ACTIVE}
                                 onChange={(event) =>
                                     form.setFieldValue(
                                         'status',
-                                        event.currentTarget.checked ? 'ACTIVE' : 'INACTIVE'
+                                        event.currentTarget.checked
+                                            ? STATUS.ACTIVE
+                                            : STATUS.INACTIVE
                                     )
                                 }
                             />
@@ -137,6 +150,7 @@ export default function ProfilePage() {
                             id="profile-submit"
                             type="submit"
                             size="md"
+                            loading={isUpdating}
                             loaderProps={{ type: 'dots' }}
                         >
                             Save Profile

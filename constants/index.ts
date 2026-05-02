@@ -26,3 +26,16 @@ export const defaultWorkingHours = workingDayOptions.map((day) => {
         endTime: '19:00:00',
     };
 });
+
+export const ROLE = {
+    OWNER: 'OWNER',
+    ADMIN: 'ADMIN',
+    MEMBER: 'MEMBER',
+} as const;
+
+export const STATUS = {
+    ACTIVE: 'ACTIVE',
+    INACTIVE: 'INACTIVE',
+    PENDING_VERIFICATION: 'PENDING_VERIFICATION',
+    LOCKED: 'LOCKED',
+} as const;

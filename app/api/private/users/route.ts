@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     }
 }
 
-export async function POST(request: Request) {
+export async function PUT(request: Request) {
     try {
         const userId = request.headers.get('x-user-id');
 
@@ -72,13 +72,10 @@ export async function POST(request: Request) {
             },
         });
 
-        return NextResponse.json(
-            {
-                message: 'Profile updated successfully',
-                data: updatedUser,
-            },
-            { status: 200 }
-        );
+        return NextResponse.json({
+            message: 'Profile updated successfully',
+            data: updatedUser,
+        });
     } catch (error: any) {
         console.error('Profile update error:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
