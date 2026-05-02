@@ -23,7 +23,10 @@ export async function GET(request: Request) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
 
-        return NextResponse.json(user);
+        return NextResponse.json({
+            message: 'User fetched successfully',
+            data: user,
+        });
     } catch (error: any) {
         console.error('Fetch profile error:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

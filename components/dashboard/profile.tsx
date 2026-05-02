@@ -3,28 +3,20 @@ import { Avatar, Menu, UnstyledButton } from '@mantine/core';
 import { CiCircleInfo } from 'react-icons/ci';
 import Link from 'next/link';
 import { IoExitOutline } from 'react-icons/io5';
-import { useState } from 'react';
-import { useAppDispatch } from '@/app/lib/store';
-import { logoutAction } from '@/app/lib/store/auth/action';
+import { useLazyLogoutQuery } from '@/app/lib/store/auth/api';
 import { CiLock } from 'react-icons/ci';
 import { CiStopwatch } from 'react-icons/ci';
 
 export default function Profile() {
-    const [isLoading, setIsLoading] = useState(false);
-    const dispatch = useAppDispatch();
+    const [logout, { isLoading }] = useLazyLogoutQuery();
 
-    const handleLogout = () => {
-        setIsLoading(true);
-        dispatch(logoutAction())
-            .unwrap()
-            .then(() => {
-                setIsLoading(false);
-                // reload
-                window.location.reload();
-            })
-            .catch(() => {
-                setIsLoading(false);
-            });
+    const handleLogout = async () => {
+        try {
+            await logout().unwrap();
+            window.location.reload();
+        } catch {
+            // Error handling
+        }
     };
 
     return (

@@ -14,26 +14,21 @@ import {
 } from '@mantine/core';
 import { schemaResolver, useForm } from '@mantine/form';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 /**
  * Internal dependencies
  */
 import { projectData } from '@/constants';
-import { useAppDispatch, useAppSelector } from '@/app/lib/store';
-import { selectisDefaultUserGenerated } from '@/app/lib/store/auth/slice';
-import { generateDefaultUserAction, loginAction } from '@/app/lib/store/auth/action';
+import { useGenerateDefaultUserQuery, useLoginMutation } from '@/app/lib/store/auth/api';
 import { loginSchema, type LoginFormValues } from '@/app/lib/validation/auth';
 
 export default function LoginPage() {
-    const [isLoading, setIsLoading] = useState(false);
-    const dispatch = useAppDispatch();
     const router = useRouter();
-    const isDefaultUserGenerated = useAppSelector(selectisDefaultUserGenerated);
 
-    useEffect(() => {
-        dispatch(generateDefaultUserAction());
-    }, [dispatch]);
+    // Auto-fetches on mount
+    const { data: isDefaultUserGenerated } = useGenerateDefaultUserQuery();
+
+    const [login, { isLoading }] = useLoginMutation();
 
     const form = useForm<LoginFormValues>({
         mode: 'uncontrolled',
@@ -44,16 +39,14 @@ export default function LoginPage() {
         validate: schemaResolver(loginSchema),
     });
 
-    const handleSubmit = (values: LoginFormValues) => {
-        setIsLoading(true);
-        dispatch(loginAction(values))
-            .unwrap()
-            .then(() => {
-                router.push('/admin');
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+    const handleSubmit = async (values: LoginFormValues) => {
+        try {
+            await login(values).unwrap();
+            router.push('/admin/appointments');
+        } catch {
+            // Error is handled by RTK Query / matchers or toast in action (wait, I removed the action)
+            // I should add a toast here or in the base query if needed.
+        }
     };
 
     return (

@@ -1,16 +1,14 @@
 'use client';
 import { Button, Divider, TextInput, Textarea, Select, Switch } from '@mantine/core';
+import { useEffect } from 'react';
+import ProfileLoading from './loading';
 import { schemaResolver, useForm } from '@mantine/form';
 import { profileSchema, ProfileValues } from '@/app/lib/validation/profile';
 import { PageTitle } from '@/utils/portal';
-import { useAppSelector } from '@/app/lib/store';
-import { selectProfile } from '@/app/lib/store/profile/slice';
-
+import { useGetProfileQuery } from '@/app/lib/store/profile/api';
 export default function ProfilePage() {
-    // const dispatch = useAppDispatch();
-    const profile = useAppSelector(selectProfile);
-
-    console.log(profile);
+    const { data: profileResponse, isLoading, error } = useGetProfileQuery();
+    const profile = profileResponse?.data;
 
     const form = useForm<ProfileValues>({
         initialValues: {
@@ -25,6 +23,24 @@ export default function ProfilePage() {
         validate: schemaResolver(profileSchema),
     });
 
+    useEffect(() => {
+        if (profile) {
+            form.setValues({
+                name: profile.name || '',
+                position: profile.position || '',
+                phone: profile.phone || '',
+                address: profile.address || '',
+                bio: profile.bio || '',
+                role: profile.role || 'MEMBER',
+                status: profile.status || 'PENDING_VERIFICATION',
+            });
+        }
+    }, [profile]);
+
+    if (isLoading || error) {
+        return <ProfileLoading />;
+    }
+
     const handleSubmit = (values: ProfileValues) => {
         console.log('🚀 ~ ProfilePage ~ handleSubmit ~ values:', values);
     };
@@ -32,7 +48,7 @@ export default function ProfilePage() {
     return (
         <>
             <PageTitle.Source>Profile</PageTitle.Source>
-            <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg">
+            <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                 <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
                         <TextInput

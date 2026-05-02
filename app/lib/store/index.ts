@@ -3,17 +3,18 @@ import { useDispatch, useSelector, useStore } from 'react-redux';
 
 import authReducer from './auth/slice';
 import uiReducer from './ui/slice';
-import profileReducer from './profile/slice';
 import { injectStore } from '@/utils/api-helper';
+import { apiSlice } from './api-slice';
+import { rtkErrorMiddleware } from './middleware/error-handler';
 
 export const store = configureStore({
     reducer: {
+        [apiSlice.reducerPath]: apiSlice.reducer,
         auth: authReducer,
         ui: uiReducer,
-        profile: profileReducer,
     },
-    // middleware: (getDefaultMiddleware) =>
-    // getDefaultMiddleware().concat(profileReducer.middleware),
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().concat(apiSlice.middleware, rtkErrorMiddleware),
 });
 
 injectStore(store);

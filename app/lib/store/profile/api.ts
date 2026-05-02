@@ -1,7 +1,13 @@
-import APIHelper from '@/utils/api-helper';
+import { apiSlice } from '../api-slice';
 import type { Profile } from '@/models/profile';
-import type { ApiResponse } from '@/models';
 
-export async function getProfileApi(): ApiResponse<Profile> {
-    return APIHelper.get(`/api/private/users`);
-}
+export const profileApi = apiSlice.injectEndpoints({
+    endpoints: (builder) => ({
+        getProfile: builder.query<{ message: string; data: Profile }, void>({
+            query: () => `/api/private/users`,
+            providesTags: ['Profile'],
+        }),
+    }),
+});
+
+export const { useGetProfileQuery } = profileApi;

@@ -1,4 +1,5 @@
 import axios, { AxiosError, type AxiosResponse } from 'axios';
+import toast from 'react-hot-toast';
 
 let store: any;
 
@@ -38,6 +39,11 @@ API.interceptors.response.use(
         const code = error.response?.status as number;
         if ([401].includes(code)) {
             store?.dispatch({ type: 'auth/clearData' });
+        } else {
+            const errorData = error.response?.data as any;
+            const errorMessage =
+                errorData?.message || error.message || 'An unexpected error occurred';
+            toast.error(errorMessage);
         }
         return Promise.reject(error);
     }

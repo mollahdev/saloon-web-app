@@ -1,15 +1,22 @@
-import APIHelper from '@/utils/api-helper';
-import type { ApiResponse } from '@/models';
+import { apiSlice } from '../api-slice';
 import type { LoginPayload, Login } from '@/models/auth';
 
-export async function getGenerateDefaultUserApi() {
-    return APIHelper.get(`/api/public/seed/default-user`);
-}
+export const authApi = apiSlice.injectEndpoints({
+    endpoints: (builder) => ({
+        generateDefaultUser: builder.query<boolean, void>({
+            query: () => `/api/public/seed/default-user`,
+        }),
+        login: builder.mutation<{ message: string; data: Login }, LoginPayload>({
+            query: (payload) => ({
+                url: `/api/public/auth/login`,
+                method: 'POST',
+                body: payload,
+            }),
+        }),
+        logout: builder.query<{ data: any }, void>({
+            query: () => `/api/public/auth/logout`,
+        }),
+    }),
+});
 
-export async function getLoginApi(payload: LoginPayload): ApiResponse<Login> {
-    return APIHelper.post(`/api/public/auth/login`, payload);
-}
-
-export async function getLogoutApi() {
-    return APIHelper.get(`/api/public/auth/logout`);
-}
+export const { useGenerateDefaultUserQuery, useLoginMutation, useLazyLogoutQuery } = authApi;
