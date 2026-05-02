@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 
-import authReducer from './auth-slice/auth-slice';
-import uiReducer from './ui-slice/ui-slice';
-import profileReducer from './profile-slice/profile-slice';
+import authReducer from './auth/slice';
+import uiReducer from './ui/slice';
+import profileReducer from './profile/slice';
 import { injectStore } from '@/utils/api-helper';
 
 export const store = configureStore({

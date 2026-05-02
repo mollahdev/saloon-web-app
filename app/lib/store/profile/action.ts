@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 /**
  * Internal dependencies
  */
-import { getProfileApi } from './profile-api';
+import { getProfileApi } from './api';
 import type { KnownError } from '@/models';
 
 export const fetchProfileAction = createAsyncThunk(

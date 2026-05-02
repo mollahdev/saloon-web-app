@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchProfileAction } from './profile-action';
+import { fetchProfileAction } from './action';
 import type { RootState } from '@/app/lib/store';
 
 const initialState = {

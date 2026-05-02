@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { IoExitOutline } from 'react-icons/io5';
 import { useState } from 'react';
 import { useAppDispatch } from '@/app/lib/store';
-import { logoutAction } from '@/app/lib/store/auth-slice/auth-action';
+import { logoutAction } from '@/app/lib/store/auth/action';
 import { CiLock } from 'react-icons/ci';
 import { CiStopwatch } from 'react-icons/ci';
 

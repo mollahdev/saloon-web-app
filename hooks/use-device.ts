@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAppDispatch } from '@/app/lib/store';
 import { detectDevice } from '@/utils/device';
-import { setDevice, setSidebarExpanded } from '@/app/lib/store/ui-slice/ui-slice';
+import { setDevice, setSidebarExpanded } from '@/app/lib/store/ui/slice';
 
 export const useDevice = () => {
     const dispatch = useAppDispatch();

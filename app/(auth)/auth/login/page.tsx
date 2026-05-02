@@ -21,8 +21,8 @@ import { useRouter } from 'next/navigation';
  */
 import { projectData } from '@/constants';
 import { useAppDispatch, useAppSelector } from '@/app/lib/store';
-import { selectisDefaultUserGenerated } from '@/app/lib/store/auth-slice/auth-slice';
-import { generateDefaultUserAction, loginAction } from '@/app/lib/store/auth-slice/auth-action';
+import { selectisDefaultUserGenerated } from '@/app/lib/store/auth/slice';
+import { generateDefaultUserAction, loginAction } from '@/app/lib/store/auth/action';
 import { loginSchema, type LoginFormValues } from '@/app/lib/validation/auth';
 
 export default function LoginPage() {

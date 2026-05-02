@@ -7,11 +7,7 @@ import { useEffect } from 'react';
  * Internal dependency
  */
 import { useAppSelector, useAppDispatch } from '@/app/lib/store';
-import {
-    selectSidebarExpanded,
-    setSidebarExpanded,
-    selectDevice,
-} from '@/app/lib/store/ui-slice/ui-slice';
+import { selectSidebarExpanded, setSidebarExpanded, selectDevice } from '@/app/lib/store/ui/slice';
 import SidebarLogo from './sidebar-logo';
 import SidebarMenu from './sidebar-menu';
 

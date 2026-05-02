@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 /**
  * Internal dependencies
  */
-import { getGenerateDefaultUserApi, getLoginApi, getLogoutApi } from './auth-api';
+import { getGenerateDefaultUserApi, getLoginApi, getLogoutApi } from './api';
 import type { LoginPayload } from '@/models/auth';
 import type { KnownError } from '@/models';
 

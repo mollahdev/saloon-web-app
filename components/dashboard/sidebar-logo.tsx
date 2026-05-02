@@ -5,7 +5,7 @@ import Image from 'next/image';
  * Internal dependency
  */
 import { useAppSelector } from '@/app/lib/store';
-import { selectSidebarExpanded } from '@/app/lib/store/ui-slice/ui-slice';
+import { selectSidebarExpanded } from '@/app/lib/store/ui/slice';
 import { projectData } from '@/constants';
 
 export default function SidebarLogo() {

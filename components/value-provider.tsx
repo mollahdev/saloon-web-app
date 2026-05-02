@@ -2,7 +2,7 @@
 import type { PropsWithChildren } from 'react';
 import { useEffect } from 'react';
 import { useAppDispatch } from '@/app/lib/store';
-import { setAccessToken } from '@/app/lib/store/auth-slice/auth-slice';
+import { setAccessToken } from '@/app/lib/store/auth/slice';
 import { useDevice } from '@/hooks/use-device';
 
 type Props = {

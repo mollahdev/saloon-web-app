@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { generateDefaultUserAction, loginAction, logoutAction } from './auth-action';
+import { generateDefaultUserAction, loginAction, logoutAction } from './action';
 import type { Login } from '@/models/auth';
 import type { RootState } from '@/app/lib/store';
 import type { PayloadAction } from '@reduxjs/toolkit';

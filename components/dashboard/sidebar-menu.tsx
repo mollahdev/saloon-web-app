@@ -11,7 +11,7 @@ import { usePathname } from 'next/navigation';
  * Internal dependency
  */
 import { useAppSelector } from '@/app/lib/store';
-import { selectSidebarExpanded } from '@/app/lib/store/ui-slice/ui-slice';
+import { selectSidebarExpanded } from '@/app/lib/store/ui/slice';
 
 export default function SidebarMenu() {
     const sidebarExpanded = useAppSelector(selectSidebarExpanded);
