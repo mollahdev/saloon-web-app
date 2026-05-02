@@ -43,3 +43,26 @@ export async function clearSession() {
     const cookieStore = await cookies();
     cookieStore.delete('access_token');
 }
+
+import { NextResponse } from 'next/server';
+
+export function withAuth(
+    handler: (req: Request, context: any, session: any) => Promise<Response> | Response
+) {
+    return async (request: Request, context: any) => {
+        const authHeader = request.headers.get('authorization');
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
+        const token = authHeader.split(' ')[1];
+        const session = await decrypt(token);
+
+        if (!session || !session.userId) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
+        return handler(request, context, session);
+    };
+}

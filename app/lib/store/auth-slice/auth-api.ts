@@ -3,13 +3,17 @@ import type { ApiResponse } from '@/models';
 import type { LoginPayload, Login } from '@/models/auth';
 
 export async function getGenerateDefaultUserApi() {
-    return APIHelper.get(`/api/seed/default-user`);
+    return APIHelper.get(`/api/public/seed/default-user`);
 }
 
 export async function getLoginApi(payload: LoginPayload): ApiResponse<Login> {
-    return APIHelper.post(`/api/auth/login`, payload);
+    return APIHelper.post(`/api/public/auth/login`, payload);
 }
 
 export async function getLogoutApi() {
-    return APIHelper.get(`/api/auth/logout`);
+    return APIHelper.get(`/api/public/auth/logout`);
+}
+
+export async function getProfileApi() {
+    return APIHelper.get(`/api/private/users`);
 }

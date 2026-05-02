@@ -1,60 +1,121 @@
 'use client';
-import { Button, Divider, PasswordInput, TextInput } from '@mantine/core';
+import { Button, Divider, TextInput, Textarea, Select, Switch } from '@mantine/core';
 import { schemaResolver, useForm } from '@mantine/form';
-import { loginSchema } from '@/app/lib/validation/auth';
+import { profileSchema, ProfileValues } from '@/app/lib/validation/profile';
 import { PageTitle } from '@/utils/portal';
 
 export default function ProfilePage() {
-    const form = useForm({
-        mode: 'uncontrolled',
+    const form = useForm<ProfileValues>({
         initialValues: {
-            email: '',
-            password: '',
+            name: '',
+            position: '',
+            phone: '',
+            address: '',
+            bio: '',
+            role: 'MEMBER',
+            status: 'PENDING_VERIFICATION',
         },
-        validate: schemaResolver(loginSchema),
+        validate: schemaResolver(profileSchema),
     });
 
-    const handleSubmit = (values: any) => {
+    const handleSubmit = (values: ProfileValues) => {
         console.log('🚀 ~ ProfilePage ~ handleSubmit ~ values:', values);
     };
 
     return (
         <>
             <PageTitle.Source>Profile</PageTitle.Source>
-            <div className="max-w-4xl mx-auto bg-white p-6 rounded-md">
+            <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg">
                 <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
-                    <div className="grid grid-cols-2 gap-6 pb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
                         <TextInput
-                            id="login-email"
-                            label="Email address"
-                            placeholder="you@example.com"
-                            type="email"
-                            autoComplete="email"
+                            id="profile-name"
+                            label="Name"
+                            placeholder="Your name"
                             size="md"
-                            key={form.key('email')}
-                            {...form.getInputProps('email')}
+                            key={form.key('name')}
+                            {...form.getInputProps('name')}
                         />
 
-                        <PasswordInput
-                            id="login-password"
-                            label="Password"
-                            placeholder="Your password"
-                            autoComplete="current-password"
+                        <TextInput
+                            id="profile-position"
+                            label="Position"
+                            placeholder="Your position"
                             size="md"
-                            key={form.key('password')}
-                            {...form.getInputProps('password')}
+                            key={form.key('position')}
+                            {...form.getInputProps('position')}
                         />
+
+                        <TextInput
+                            id="profile-phone"
+                            label="Phone number"
+                            placeholder="Your phone number"
+                            type="tel"
+                            size="md"
+                            key={form.key('phone')}
+                            {...form.getInputProps('phone')}
+                        />
+
+                        <TextInput
+                            id="profile-address"
+                            label="Address"
+                            placeholder="Your address"
+                            size="md"
+                            key={form.key('address')}
+                            {...form.getInputProps('address')}
+                        />
+
+                        <div className="col-span-1 md:col-span-2">
+                            <Textarea
+                                id="profile-bio"
+                                label="Bio"
+                                placeholder="Tell us about yourself..."
+                                size="md"
+                                minRows={4}
+                                key={form.key('bio')}
+                                {...form.getInputProps('bio')}
+                            />
+                        </div>
+
+                        <Select
+                            id="profile-role"
+                            label="Role"
+                            placeholder="Select role"
+                            size="md"
+                            data={[
+                                { value: 'ADMIN', label: 'Admin' },
+                                { value: 'MEMBER', label: 'Member' },
+                            ]}
+                            key={form.key('role')}
+                            {...form.getInputProps('role')}
+                        />
+
+                        <div className="flex items-center pt-6">
+                            <Switch
+                                id="profile-status"
+                                label="Active Account"
+                                size="md"
+                                key={form.key('status')}
+                                checked={form.values.status === 'ACTIVE'}
+                                onChange={(event) =>
+                                    form.setFieldValue(
+                                        'status',
+                                        event.currentTarget.checked ? 'ACTIVE' : 'INACTIVE'
+                                    )
+                                }
+                            />
+                        </div>
                     </div>
 
                     <Divider />
-                    <div className="pt-4">
+                    <div className="pt-4 flex justify-end">
                         <Button
-                            id="login-submit"
+                            id="profile-submit"
                             type="submit"
                             size="md"
                             loaderProps={{ type: 'dots' }}
                         >
-                            Submit
+                            Save Profile
                         </Button>
                     </div>
                 </form>
