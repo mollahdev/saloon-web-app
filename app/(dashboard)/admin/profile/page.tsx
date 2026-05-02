@@ -6,6 +6,7 @@ import { schemaResolver, useForm } from '@mantine/form';
 import { profileSchema, ProfileValues } from '@/app/lib/validation/profile';
 import { PageTitle } from '@/utils/portal';
 import { useGetProfileQuery } from '@/app/lib/store/profile/api';
+
 export default function ProfilePage() {
     const { data: profileResponse, isLoading, error } = useGetProfileQuery();
     const profile = profileResponse?.data;
