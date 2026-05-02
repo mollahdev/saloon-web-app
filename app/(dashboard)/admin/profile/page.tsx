@@ -3,8 +3,15 @@ import { Button, Divider, TextInput, Textarea, Select, Switch } from '@mantine/c
 import { schemaResolver, useForm } from '@mantine/form';
 import { profileSchema, ProfileValues } from '@/app/lib/validation/profile';
 import { PageTitle } from '@/utils/portal';
+import { useAppSelector } from '@/app/lib/store';
+import { selectProfile } from '@/app/lib/store/profile-slice/profile-slice';
 
 export default function ProfilePage() {
+    // const dispatch = useAppDispatch();
+    const profile = useAppSelector(selectProfile);
+
+    console.log(profile);
+
     const form = useForm<ProfileValues>({
         initialValues: {
             name: '',

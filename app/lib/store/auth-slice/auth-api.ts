@@ -13,7 +13,3 @@ export async function getLoginApi(payload: LoginPayload): ApiResponse<Login> {
 export async function getLogoutApi() {
     return APIHelper.get(`/api/public/auth/logout`);
 }
-
-export async function getProfileApi() {
-    return APIHelper.get(`/api/private/users`);
-}

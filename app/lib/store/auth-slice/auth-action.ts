@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 /**
  * Internal dependencies
  */
-import { getGenerateDefaultUserApi, getLoginApi, getLogoutApi, getProfileApi } from './auth-api';
+import { getGenerateDefaultUserApi, getLoginApi, getLogoutApi } from './auth-api';
 import type { LoginPayload } from '@/models/auth';
 import type { KnownError } from '@/models';
 
@@ -38,23 +38,6 @@ export const loginAction = createAsyncThunk(
             }
 
             toast.error(error.response.data.message);
-            return rejectWithValue(error.response.data.message);
-        }
-    }
-);
-
-export const fetchProfileAction = createAsyncThunk(
-    'auth/fetchProfile',
-    async (_, { rejectWithValue }) => {
-        try {
-            const response = await getProfileApi();
-            return response;
-        } catch (err: any) {
-            console.error('Error fetching profile:', err);
-            const error: AxiosError<KnownError> = err;
-            if (!error.response) {
-                return rejectWithValue(err.message);
-            }
             return rejectWithValue(error.response.data.message);
         }
     }
