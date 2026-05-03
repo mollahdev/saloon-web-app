@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { profileSchema } from '@/app/lib/validation/profile';
+import { STATUS } from '@/constants';
 
 export async function GET(request: Request) {
     try {
@@ -19,8 +20,8 @@ export async function GET(request: Request) {
             },
         });
 
-        if (!user) {
-            return NextResponse.json({ message: 'User not found' }, { status: 404 });
+        if (!user || user.status !== STATUS.ACTIVE) {
+            return NextResponse.json({ message: 'User not found or inactive' }, { status: 404 });
         }
 
         return NextResponse.json({

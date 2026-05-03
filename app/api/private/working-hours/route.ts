@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { workingHoursSchema } from '@/app/lib/validation/working-hours';
-import { defaultWorkingHours } from '@/constants';
+import { defaultWorkingHours, STATUS } from '@/constants';
 
 export async function GET(request: Request) {
     try {
         const userId = request.headers.get('x-user-id') as string;
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { status: true },
+        });
+
+        if (!user || user.status !== STATUS.ACTIVE) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
+        }
 
         const workingHours = await prisma.workingHour.findMany({
             where: { userId },
@@ -39,6 +48,15 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
     try {
         const userId = request.headers.get('x-user-id') as string;
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { status: true },
+        });
+
+        if (!user || user.status !== STATUS.ACTIVE) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
+        }
 
         const body = await request.json();
         const val = workingHoursSchema.safeParse(body);

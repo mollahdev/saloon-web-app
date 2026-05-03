@@ -1,7 +1,7 @@
-export type ApiResponse<T> = Promise<{
+export type ApiResponse<T> = {
     message: string;
     data: T;
-}>;
+};
 
 export interface KnownError {
     message: string;
