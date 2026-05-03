@@ -22,7 +22,7 @@ export default async function AdminLayout(props: PropsWithChildren) {
         <AdminSidebar>
             <div className="flex flex-col">
                 <div className="h-14 bg-white flex justify-between items-center">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 md:gap-4">
                         <CollapseButton />
                         <DashboardPageTitle />
                     </div>

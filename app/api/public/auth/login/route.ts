@@ -61,6 +61,7 @@ export async function POST(request: Request) {
         secure: true,
         sameSite: 'strict',
         path: '/',
+        maxAge: 60 * 60 * 24 * 365 * 10, // 10 years (effectively no limit)
     });
 
     return response;

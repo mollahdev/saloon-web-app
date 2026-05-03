@@ -58,7 +58,7 @@ export default function ProfilePage() {
     return (
         <>
             <PageTitle.Source>Profile</PageTitle.Source>
-            <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="max-w-3xl mx-auto bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100">
                 <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
                     <div className="grid grid-cols-1 items-center md:grid-cols-2 gap-6 pb-4">
                         <TextInput
