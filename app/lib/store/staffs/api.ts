@@ -8,7 +8,14 @@ export const staffsApi = apiSlice.injectEndpoints({
             query: () => `/api/private/staffs`,
             providesTags: ['Staffs'],
         }),
+        deleteStaff: builder.mutation<ApiResponse<null>, string>({
+            query: (id) => ({
+                url: `/api/private/staffs/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['Staffs'],
+        }),
     }),
 });
 
-export const { useGetStaffsQuery } = staffsApi;
+export const { useGetStaffsQuery, useDeleteStaffMutation } = staffsApi;

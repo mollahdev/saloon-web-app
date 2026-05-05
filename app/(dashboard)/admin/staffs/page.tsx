@@ -33,7 +33,7 @@ export default function StaffsPage() {
     }
 
     return (
-        <div className="max-w-[1600px] mx-auto w-full">
+        <div className="max-w-[1300px] mx-auto w-full">
             <PageTitle.Source>Staffs</PageTitle.Source>
 
             {staffs.length === 0 ? (

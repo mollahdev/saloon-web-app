@@ -14,6 +14,9 @@ import {
 import { HiOutlineTrash } from 'react-icons/hi';
 import { Profile } from '@/models/profile';
 import { ROLE, STATUS } from '@/constants';
+import { useConfirmation } from '@/hooks/use-confirmation';
+import { useDeleteStaffMutation } from '@/app/lib/store/staffs/api';
+import toast from 'react-hot-toast';
 
 interface StaffCardProps {
     staff: Profile;
@@ -33,6 +36,27 @@ const statusColors: Record<string, string> = {
 };
 
 export function StaffCard({ staff }: StaffCardProps) {
+    const { confirm } = useConfirmation();
+    const [deleteStaff] = useDeleteStaffMutation();
+
+    const handleDeleteClick = () => {
+        confirm({
+            title: 'Delete Staff',
+            message: `Are you sure you want to delete ${staff.name}? This action cannot be undone.`,
+            confirmLabel: 'Delete',
+            color: 'red',
+            onConfirm: async () => {
+                try {
+                    await deleteStaff(staff.id).unwrap();
+                    toast.success('Staff member deleted successfully');
+                } catch (error: any) {
+                    toast.error(error?.data?.message || 'Failed to delete staff member');
+                    throw error; // Rethrow to keep modal state if needed, though provider closes on success
+                }
+            },
+        });
+    };
+
     return (
         <Card
             padding="xl"
@@ -111,6 +135,7 @@ export function StaffCard({ staff }: StaffCardProps) {
                         color="red"
                         size="lg"
                         className="h-9 w-9 transition-colors duration-200 hover:bg-red-100 shrink-0"
+                        onClick={handleDeleteClick}
                     >
                         <HiOutlineTrash size={18} strokeWidth={1.5} />
                     </ActionIcon>
