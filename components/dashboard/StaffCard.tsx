@@ -12,6 +12,7 @@ import {
     Button,
 } from '@mantine/core';
 import { HiOutlineTrash } from 'react-icons/hi';
+import Link from 'next/link';
 import { Profile } from '@/models/profile';
 import { ROLE, STATUS } from '@/constants';
 import { useConfirmation } from '@/hooks/use-confirmation';
@@ -119,15 +120,18 @@ export function StaffCard({ staff }: StaffCardProps) {
                     Edit
                 </Button>
 
-                <Button
-                    variant="light"
-                    color="teal"
-                    size="sm"
-                    px={6}
-                    className="flex-1 h-9 transition-all hover:bg-teal-100 font-bold text-[13px]"
-                >
-                    Schedule
-                </Button>
+                <Link href={`/admin/schedule/${staff.id}`} className="flex-1">
+                    <Button
+                        variant="light"
+                        color="teal"
+                        size="sm"
+                        px={6}
+                        fullWidth
+                        className="h-9 transition-all hover:bg-teal-100 font-bold text-[13px]"
+                    >
+                        Schedule
+                    </Button>
+                </Link>
 
                 <Tooltip label="Delete Staff" withArrow>
                     <ActionIcon
