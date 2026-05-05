@@ -15,6 +15,7 @@ model User {
   otps         Otp[]
   skills       Skill[]
   workingHours WorkingHour[]
+  timeOffs     TimeOff[]
 
   @@map("users")
 }

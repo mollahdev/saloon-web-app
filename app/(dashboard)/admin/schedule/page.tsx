@@ -1,30 +1,27 @@
 'use client';
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { PageTitle } from '@/utils/portal';
-import ScheduleLoading from '../loading';
+import ScheduleLoading from './loading';
 import { WorkingHoursValues } from '@/app/lib/validation/working-hours';
 import {
-    useGetStaffScheduleQuery,
-    useUpdateStaffScheduleMutation,
-} from '@/app/lib/store/staffs/schedule-api';
+    useGetWorkingHoursQuery,
+    useUpdateWorkingHoursMutation,
+} from '@/app/lib/store/working-hours/api';
 import { defaultWorkingHours } from '@/constants';
 import TimeOffSection from '@/components/dashboard/TimeOffSection';
 import { SchedulePageHeader } from '@/components/dashboard/schedule/SchedulePageHeader';
 import { WorkingHoursForm } from '@/components/dashboard/schedule/WorkingHoursForm';
 
-export default function StaffSchedulePage() {
-    const { id } = useParams<{ id: string }>();
+export default function BusinessSchedulePage() {
     const [activeTab, setActiveTab] = useState<'schedule' | 'timeoff'>('schedule');
-    const { data: response, isLoading, error } = useGetStaffScheduleQuery(id);
-    const [updateSchedule, { isLoading: isUpdating }] = useUpdateStaffScheduleMutation();
-    const staff = response?.data?.staff;
+    const { data: response, isLoading, error } = useGetWorkingHoursQuery();
+    const [updateSchedule, { isLoading: isUpdating }] = useUpdateWorkingHoursMutation();
 
     if (isLoading) {
         return (
             <>
-                <PageTitle.Source>Schedule</PageTitle.Source>
+                <PageTitle.Source>Business Schedule</PageTitle.Source>
                 <ScheduleLoading />
             </>
         );
@@ -33,10 +30,10 @@ export default function StaffSchedulePage() {
     if (error) {
         return (
             <>
-                <PageTitle.Source>Schedule</PageTitle.Source>
+                <PageTitle.Source>Business Schedule</PageTitle.Source>
                 <div className="max-w-3xl w-full">
                     <div className="bg-red-50 p-6 rounded-xl text-red-600 text-center">
-                        Failed to load schedule. Please try again later.
+                        Failed to load business schedule. Please try again later.
                     </div>
                 </div>
             </>
@@ -45,10 +42,10 @@ export default function StaffSchedulePage() {
 
     const handleSubmit = async (values: WorkingHoursValues) => {
         try {
-            const res = await updateSchedule({ staffId: id, body: values }).unwrap();
-            toast.success(res.message || 'Schedule updated successfully');
+            const res = await updateSchedule(values).unwrap();
+            toast.success(res.message || 'Business schedule updated successfully');
         } catch (err: any) {
-            toast.error(err?.data?.message || 'Failed to update schedule');
+            toast.error(err?.data?.message || 'Failed to update business schedule');
         }
     };
 
@@ -67,17 +64,13 @@ export default function StaffSchedulePage() {
     return (
         <div className="max-w-3xl w-full pb-10">
             <SchedulePageHeader
-                title={staff?.name || 'Staff Schedule'}
-                description={
-                    staff
-                        ? `Configure weekly hours and time off for ${staff.name}.`
-                        : 'Configure staff member schedule.'
-                }
+                title="Business Schedule"
+                description="Configure the general opening hours and business-wide time off."
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
                 tabs={[
-                    { id: 'schedule', label: 'Weekly Schedule' },
-                    { id: 'timeoff', label: 'Time Off' },
+                    { id: 'schedule', label: 'Opening Hours' },
+                    { id: 'timeoff', label: 'Business Closures' },
                 ]}
             />
 
@@ -87,12 +80,16 @@ export default function StaffSchedulePage() {
                     initialValues={initialValues}
                     onSubmit={handleSubmit}
                     isLoading={isUpdating}
-                    submitLabel="Update Schedule"
+                    submitLabel="Update Business Schedule"
                 />
             )}
 
             {/* Time Off */}
-            {activeTab === 'timeoff' && <TimeOffSection staffId={id} />}
+            {activeTab === 'timeoff' && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <TimeOffSection staffId="business" />
+                </div>
+            )}
         </div>
     );
 }

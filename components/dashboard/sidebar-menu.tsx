@@ -5,6 +5,7 @@ import { LuScissors } from 'react-icons/lu';
 import { RiCoupon2Line } from 'react-icons/ri';
 import { RxPeople } from 'react-icons/rx';
 import { GoDatabase } from 'react-icons/go';
+import { HiOutlineClock } from 'react-icons/hi';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 /**
@@ -39,6 +40,11 @@ export default function SidebarMenu() {
             slug: '/admin/staffs',
         },
         {
+            name: 'Schedule',
+            icon: <HiOutlineClock size={20} />,
+            slug: '/admin/schedule',
+        },
+        {
             name: 'Customers',
             icon: <GoDatabase size={20} />,
             slug: '/admin/customers',
@@ -56,9 +62,9 @@ export default function SidebarMenu() {
                                     'flex items-center gap-2 px-5 h-14 border-solid border-l-[3px] transition-all duration-200',
                                     {
                                         'text-white/90 hover:bg-black/10 border-l-transparent':
-                                            pathname !== menu.slug,
+                                            !pathname.startsWith(menu.slug),
                                         'bg-primary/10 text-white border-l-primary':
-                                            pathname === menu.slug,
+                                            pathname.startsWith(menu.slug),
                                         'flex items-center justify-center': !sidebarExpanded,
                                     },
                                 ])}
