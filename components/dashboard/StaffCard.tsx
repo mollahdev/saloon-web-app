@@ -1,0 +1,121 @@
+'use client';
+import {
+    Card,
+    Stack,
+    Group,
+    Avatar,
+    Text,
+    Badge,
+    Divider,
+    Tooltip,
+    ActionIcon,
+    Button,
+} from '@mantine/core';
+import { HiOutlineTrash } from 'react-icons/hi';
+import { Profile } from '@/models/profile';
+import { ROLE, STATUS } from '@/constants';
+
+interface StaffCardProps {
+    staff: Profile;
+}
+
+const roleColors: Record<string, string> = {
+    [ROLE.OWNER]: 'red',
+    [ROLE.ADMIN]: 'blue',
+    [ROLE.MEMBER]: 'gray',
+};
+
+const statusColors: Record<string, string> = {
+    [STATUS.ACTIVE]: 'teal',
+    [STATUS.INACTIVE]: 'pink',
+    [STATUS.PENDING_VERIFICATION]: 'orange',
+    [STATUS.LOCKED]: 'red',
+};
+
+export function StaffCard({ staff }: StaffCardProps) {
+    return (
+        <Card
+            padding="xl"
+            radius="md"
+            className="relative transition-all duration-200 border border-gray-100 overflow-hidden hover:-translate-y-1 hover:shadow-lg bg-white group"
+        >
+            {/* Top Gradient Border */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-cyan-400" />
+
+            <Stack align="center" gap="sm" className="relative z-10">
+                <div className="relative mt-2">
+                    <Avatar
+                        src={staff.avatar}
+                        size={80}
+                        radius={80}
+                        color="primary"
+                        className="border-2 border-gray-50"
+                    />
+                    <div
+                        className={`absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${
+                            staff.status === STATUS.ACTIVE ? 'bg-teal-500' : 'bg-gray-400'
+                        }`}
+                    />
+                </div>
+
+                <div className="text-center">
+                    <Text className="text-lg font-bold text-gray-800 tracking-tight">
+                        {staff.name}
+                    </Text>
+                    <Text className="text-sm font-medium text-gray-500">
+                        {staff.position || 'Specialist'}
+                    </Text>
+                </div>
+
+                <Group gap="xs" mt="xs">
+                    <Badge
+                        color={roleColors[staff.role]}
+                        variant="light"
+                        size="sm"
+                        className="font-semibold"
+                    >
+                        {staff.role}
+                    </Badge>
+                    <Badge color={statusColors[staff.status]} variant="dot" size="sm">
+                        {staff.status.replace(/_/g, ' ')}
+                    </Badge>
+                </Group>
+            </Stack>
+
+            <Divider my="md" variant="dashed" className="opacity-60" />
+
+            <div className="flex flex-row items-center gap-1.5 w-full">
+                <Button
+                    variant="light"
+                    color="blue"
+                    size="sm"
+                    px={12}
+                    className="flex-initial h-9 transition-all hover:bg-blue-100 font-bold text-[13px]"
+                >
+                    Edit
+                </Button>
+
+                <Button
+                    variant="light"
+                    color="teal"
+                    size="sm"
+                    px={6}
+                    className="flex-1 h-9 transition-all hover:bg-teal-100 font-bold text-[13px]"
+                >
+                    Schedule
+                </Button>
+
+                <Tooltip label="Delete Staff" withArrow>
+                    <ActionIcon
+                        variant="light"
+                        color="red"
+                        size="lg"
+                        className="h-9 w-9 transition-colors duration-200 hover:bg-red-100 shrink-0"
+                    >
+                        <HiOutlineTrash size={18} strokeWidth={1.5} />
+                    </ActionIcon>
+                </Tooltip>
+            </div>
+        </Card>
+    );
+}
