@@ -8,4 +8,5 @@ model BusinessWeeklyHour {
   updatedAt DateTime  @updatedAt @map("updated_at")
 
   @@map("business_weekly_hours")
+  @@unique([dayOfWeek])
 }

@@ -1,10 +1,14 @@
-import { ROLE } from '@/constants';
+import { ROLE, STATUS } from '@/constants';
 
-/**
- * Checks if a user role is ADMIN or OWNER
- * @param role The role to check
- * @returns boolean
- */
-export const isAdminOrOwner = (role?: string): boolean => {
-    return role === ROLE.ADMIN || role === ROLE.OWNER;
+interface UserWithPermissions {
+    role: string;
+    status: string;
+}
+
+export const isAdminOrOwner = (user: UserWithPermissions): boolean => {
+    return user.role === ROLE.ADMIN || user.role === ROLE.OWNER;
+};
+
+export const isActiveStatus = (user: UserWithPermissions): boolean => {
+    return user.status === STATUS.ACTIVE || user.role === ROLE.OWNER;
 };

@@ -21,7 +21,7 @@ export async function GET(
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
-        if (!isAdminOrOwner(user.role)) {
+        if (!isAdminOrOwner(user)) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
@@ -35,7 +35,7 @@ export async function GET(
             return NextResponse.json({ message: 'Staff not found' }, { status: 404 });
         }
 
-        const workingHours = await prisma.workingHour.findMany({
+        const workingHours = await prisma.staffWeeklyHour.findMany({
             where: { userId: userId },
         });
 
@@ -79,7 +79,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
-        if (!isAdminOrOwner(user.role)) {
+        if (!isAdminOrOwner(user)) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
@@ -110,7 +110,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             const startTime = wh.startTime.length === 5 ? `${wh.startTime}:00` : wh.startTime;
             const endTime = wh.endTime.length === 5 ? `${wh.endTime}:00` : wh.endTime;
 
-            return prisma.workingHour.upsert({
+            return prisma.staffWeeklyHour.upsert({
                 where: {
                     userId_dayOfWeek: {
                         userId: staffId,

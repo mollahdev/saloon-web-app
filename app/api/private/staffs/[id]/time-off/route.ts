@@ -22,11 +22,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
-        if (!isAdminOrOwner(user.role)) {
+        if (!isAdminOrOwner(user)) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
-        const timeOffs = await prisma.timeOff.findMany({
+        const timeOffs = await prisma.staffTimeOff.findMany({
             where: { userId: staffId },
             orderBy: { startDate: 'asc' },
         });
@@ -59,7 +59,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
-        if (!isAdminOrOwner(user.role)) {
+        if (!isAdminOrOwner(user)) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
@@ -88,7 +88,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
         const data = val.data;
 
-        const timeOff = await prisma.timeOff.create({
+        const timeOff = await prisma.staffTimeOff.create({
             data: {
                 userId: staffId,
                 type: data.type,

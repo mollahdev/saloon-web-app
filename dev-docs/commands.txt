@@ -1,1 +1,2 @@
+docker compose exec app npx prisma generate
 docker compose exec app npx prisma migrate dev --name update_time_off_tables

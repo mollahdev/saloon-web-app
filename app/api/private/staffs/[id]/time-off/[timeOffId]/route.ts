@@ -24,12 +24,12 @@ export async function DELETE(
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
-        if (!isAdminOrOwner(user.role)) {
+        if (!isAdminOrOwner(user)) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
         // Verify the time-off belongs to this staff
-        const timeOff = await prisma.timeOff.findFirst({
+        const timeOff = await prisma.staffTimeOff.findFirst({
             where: { id: timeOffId, userId: staffId },
         });
 
@@ -37,7 +37,7 @@ export async function DELETE(
             return NextResponse.json({ message: 'Time off entry not found' }, { status: 404 });
         }
 
-        await prisma.timeOff.delete({
+        await prisma.staffTimeOff.delete({
             where: { id: timeOffId },
         });
 

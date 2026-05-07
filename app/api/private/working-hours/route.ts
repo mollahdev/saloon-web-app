@@ -16,7 +16,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
-        const workingHours = await prisma.workingHour.findMany({
+        const workingHours = await prisma.staffWeeklyHour.findMany({
             where: { userId },
         });
 
@@ -77,7 +77,7 @@ export async function PUT(request: Request) {
             const startTime = wh.startTime.length === 5 ? `${wh.startTime}:00` : wh.startTime;
             const endTime = wh.endTime.length === 5 ? `${wh.endTime}:00` : wh.endTime;
 
-            return prisma.workingHour.upsert({
+            return prisma.staffWeeklyHour.upsert({
                 where: {
                     userId_dayOfWeek: {
                         userId,

@@ -12,7 +12,7 @@ export const generateDefaultUser = async (props: DefaultUserProps) => {
     const { email, password } = props;
 
     const hashedPassword = await bcrypt.hash(password, passwordSaltRounds);
-    const user = await prisma.user.upsert({
+    await prisma.user.upsert({
         where: { email },
         update: {
             passwordHash: hashedPassword,
@@ -28,12 +28,9 @@ export const generateDefaultUser = async (props: DefaultUserProps) => {
 
     // insert default working hours
     for (const day of defaultWorkingHours) {
-        await prisma.workingHour.upsert({
+        await prisma.businessWeeklyHour.upsert({
             where: {
-                userId_dayOfWeek: {
-                    userId: user.id,
-                    dayOfWeek: day.dayOfWeek,
-                },
+                dayOfWeek: day.dayOfWeek,
             },
             update: {
                 isOffDay: day.isOffDay,
@@ -41,7 +38,6 @@ export const generateDefaultUser = async (props: DefaultUserProps) => {
                 endTime: day.endTime,
             },
             create: {
-                userId: user.id,
                 dayOfWeek: day.dayOfWeek,
                 isOffDay: day.isOffDay,
                 startTime: day.startTime,

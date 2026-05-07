@@ -19,7 +19,7 @@ export async function DELETE(
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
-        if (!isAdminOrOwner(user.role)) {
+        if (!isAdminOrOwner(user)) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 

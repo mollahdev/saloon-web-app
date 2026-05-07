@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
-import { isAdminOrOwner } from '@/app/lib/permissions';
+import { isActiveStatus, isAdminOrOwner } from '@/app/lib/permissions';
 import { ROLE, STATUS } from '@/constants';
 
 const dummyStaffs = [
@@ -68,18 +68,19 @@ const dummyStaffs = [
 
 export async function GET(request: Request) {
     try {
-        const userId = request.headers.get('x-user-id') as string;
+        const userId = request.headers.get('x-user-id');
+
+        if (!userId) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
         const user = await prisma.user.findUnique({
             where: {
                 id: userId,
             },
         });
 
-        if (!user || user.status !== STATUS.ACTIVE) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
-        }
-
-        if (!isAdminOrOwner(user.role)) {
+        if (!user || !isActiveStatus(user) || !isAdminOrOwner(user)) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
