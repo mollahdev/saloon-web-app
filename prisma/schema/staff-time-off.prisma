@@ -1,4 +1,4 @@
-model TimeOff {
+model StaffTimeOff {
   id            String          @id @default(uuid())
   userId        String          @map("user_id")
   user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -7,25 +7,13 @@ model TimeOff {
   isFullDay     Boolean         @default(true) @map("is_full_day")
   startDate     DateTime        @map("start_date") @db.Date
   endDate       DateTime?       @map("end_date") @db.Date
-  startTime     String?         @map("start_time") @db.VarChar(8)
-  endTime       String?         @map("end_time") @db.VarChar(8)
+  startTime     String?         @map("start_time")
+  endTime       String?         @map("end_time")
   repeatType    RepeatType?     @map("repeat_type")
   repeatDay     Int?            @map("repeat_day")
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
 
-  @@map("time_offs")
+  @@map("staff_time_offs")
   @@index([userId])
-}
-
-enum TimeOffType {
-  SINGLE
-  BREAK
-  RECURRING
-}
-
-enum RepeatType {
-  DAILY
-  WEEKLY
-  MONTHLY
 }

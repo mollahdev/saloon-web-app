@@ -1,0 +1,34 @@
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum Status {
+  ACTIVE
+  LOCKED
+  INACTIVE
+  PENDING_VERIFICATION
+}
+
+enum DayOfWeek {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+enum TimeOffType {
+  SINGLE
+  BREAK
+  RECURRING
+}
+
+enum RepeatType {
+  DAILY
+  WEEKLY
+  MONTHLY
+}

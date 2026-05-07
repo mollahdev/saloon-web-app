@@ -14,21 +14,8 @@ model User {
   updatedAt    DateTime @updatedAt @map("updated_at")
   otps         Otp[]
   skills       Skill[]
-  workingHours WorkingHour[]
-  timeOffs     TimeOff[]
+  staffWeeklyHours StaffWeeklyHour[]
+  timeOffs     StaffTimeOff[]
 
   @@map("users")
-}
-
-enum Role {
-  OWNER
-  ADMIN
-  MEMBER
-}
-
-enum Status {
-  ACTIVE
-  LOCKED
-  INACTIVE
-  PENDING_VERIFICATION
 }

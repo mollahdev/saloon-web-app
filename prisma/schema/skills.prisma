@@ -1,7 +1,7 @@
 model Skill {
   id        String   @id @default(uuid())
   name      String   @db.VarChar(255)
-  isGood    Boolean  @default(false)
+  isGood    Boolean  @default(false) @map("is_good")
   icon      String?  @db.VarChar(255)
   userId    String   @map("user_id")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
