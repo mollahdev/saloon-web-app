@@ -12,7 +12,7 @@ import { projectData } from '@/constants';
 import StoreProvider from '@/components/store-provider';
 import ToasterProvider from '@/components/toaster-provider';
 import ValueProvider from '@/components/value-provider';
-import { ConfirmationModal } from '@/components/dashboard/ConfirmationModal';
+import { ConfirmationModal } from '@/components/dashboard/confirmation-modal';
 import { theme } from '@/app/lib/theme';
 
 export const metadata: Metadata = {

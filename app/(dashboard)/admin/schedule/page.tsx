@@ -3,22 +3,31 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { PageTitle } from '@/utils/portal';
 import ScheduleLoading from './loading';
-import { WorkingHoursValues } from '@/app/lib/validation/working-hours';
+import { ScheduleValues } from '@/app/lib/validation/schedule';
 import {
-    useGetWorkingHoursQuery,
-    useUpdateWorkingHoursMutation,
-} from '@/app/lib/store/working-hours/api';
-import { defaultWorkingHours } from '@/constants';
-import TimeOffSection from '@/components/dashboard/TimeOffSection';
-import { SchedulePageHeader } from '@/components/dashboard/schedule/SchedulePageHeader';
-import { WorkingHoursForm } from '@/components/dashboard/schedule/WorkingHoursForm';
+    useGetScheduleQuery,
+    useUpdateScheduleMutation,
+    useGetBusinessTimeOffQuery,
+    useCreateBusinessTimeOffMutation,
+    useUpdateBusinessTimeOffMutation,
+    useDeleteBusinessTimeOffMutation,
+} from '@/app/lib/store/schedule/api';
+import TimeOffSection from '@/components/dashboard/time-off-section';
+import { SchedulePageHeader } from '@/components/dashboard/schedule/schedule-page-header';
+import { ScheduleForm } from '@/components/dashboard/schedule/schedule-form';
+import { TimeOffData } from '@/components/dashboard/time-off-section';
 
 export default function BusinessSchedulePage() {
     const [activeTab, setActiveTab] = useState<'schedule' | 'timeoff'>('schedule');
-    const { data: response, isLoading, error } = useGetWorkingHoursQuery();
-    const [updateSchedule, { isLoading: isUpdating }] = useUpdateWorkingHoursMutation();
+    const { data: response, isLoading, error } = useGetScheduleQuery();
+    const { data: timeOffRes, isLoading: isLoadingTimeOff } = useGetBusinessTimeOffQuery();
+    const [updateSchedule, { isLoading: isUpdating }] = useUpdateScheduleMutation();
+    const [createTimeOff] = useCreateBusinessTimeOffMutation();
+    const [updateTimeOff] = useUpdateBusinessTimeOffMutation();
+    const [deleteTimeOff] = useDeleteBusinessTimeOffMutation();
+    const [timeOffData, setTimeOffData] = useState<TimeOffData[]>(() => timeOffRes?.data || []);
 
-    if (isLoading) {
+    if (isLoading || isLoadingTimeOff) {
         return (
             <>
                 <PageTitle.Source>Business Schedule</PageTitle.Source>
@@ -40,7 +49,7 @@ export default function BusinessSchedulePage() {
         );
     }
 
-    const handleSubmit = async (values: WorkingHoursValues) => {
+    const handleScheduleSubmit = async (values: ScheduleValues) => {
         try {
             const res = await updateSchedule(values).unwrap();
             toast.success(res.message || 'Business schedule updated successfully');
@@ -49,17 +58,43 @@ export default function BusinessSchedulePage() {
         }
     };
 
-    const initialValues =
-        response?.data?.workingHours?.map((wh: any) => ({
-            ...wh,
-            startTime: wh.startTime.substring(0, 5),
-            endTime: wh.endTime.substring(0, 5),
-        })) ||
-        defaultWorkingHours.map((wh) => ({
-            ...wh,
-            startTime: wh.startTime.substring(0, 5),
-            endTime: wh.endTime.substring(0, 5),
-        }));
+    const handleAddTimeOff = async (entry: TimeOffData) => {
+        try {
+            const res = await createTimeOff(entry).unwrap();
+            setTimeOffData((prev) => [...prev, res.data]);
+        } catch (err: any) {
+            toast.error(err?.data?.message || 'Failed to add time off');
+        }
+    };
+
+    const handleRemoveTimeOff = async (id: string) => {
+        if (!id || id.length < 15) return; // Only delete if it's a real ID
+        try {
+            await deleteTimeOff(id).unwrap();
+            setTimeOffData((prev) => prev.filter((t) => t.id !== id));
+        } catch (err: any) {
+            toast.error(err?.data?.message || 'Failed to remove time off');
+        }
+    };
+
+    const handleUpdateTimeOff = async (id: string, entry: TimeOffData) => {
+        if (!id || id.length < 15) return; // Only update if it's a real ID
+        try {
+            const res = await updateTimeOff({ id, body: entry }).unwrap();
+            setTimeOffData((prev) => prev.map((t) => (t.id === id ? res.data : t)));
+        } catch (err: any) {
+            toast.error(err?.data?.message || 'Failed to update time off');
+        }
+    };
+
+    const initialValues = {
+        schedule:
+            response?.data?.schedule?.map((wh: any) => ({
+                ...wh,
+                startTime: wh.startTime,
+                endTime: wh.endTime,
+            })) || [],
+    };
 
     return (
         <div className="max-w-3xl w-full pb-10">
@@ -76,9 +111,9 @@ export default function BusinessSchedulePage() {
 
             {/* Weekly Schedule */}
             {activeTab === 'schedule' && (
-                <WorkingHoursForm
-                    initialValues={initialValues}
-                    onSubmit={handleSubmit}
+                <ScheduleForm
+                    initialValues={initialValues.schedule}
+                    onSubmit={handleScheduleSubmit}
                     isLoading={isUpdating}
                     submitLabel="Update Business Schedule"
                 />
@@ -87,7 +122,12 @@ export default function BusinessSchedulePage() {
             {/* Time Off */}
             {activeTab === 'timeoff' && (
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <TimeOffSection staffId="business" />
+                    <TimeOffSection
+                        initialValues={timeOffData}
+                        onAdd={handleAddTimeOff}
+                        onRemove={handleRemoveTimeOff}
+                        onUpdate={handleUpdateTimeOff}
+                    />
                 </div>
             )}
         </div>

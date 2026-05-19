@@ -6,7 +6,7 @@ import { SimpleGrid, Text } from '@mantine/core';
 import StaffsLoading from './loading';
 import { PageTitle } from '@/utils/portal';
 import { useGetStaffsQuery } from '@/app/lib/store/staffs/api';
-import { StaffCard } from '@/components/dashboard/StaffCard';
+import { StaffCard } from '@/components/dashboard/staff-card';
 
 export default function StaffsPage() {
     const { data: response, isLoading, error } = useGetStaffsQuery();

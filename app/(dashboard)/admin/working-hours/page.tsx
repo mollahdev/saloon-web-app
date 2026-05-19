@@ -5,51 +5,48 @@ import { schemaResolver, useForm } from '@mantine/form';
 import toast from 'react-hot-toast';
 import { PageTitle } from '@/utils/portal';
 import WorkingHoursLoading from './loading';
-import { workingHoursSchema, WorkingHoursValues } from '@/app/lib/validation/working-hours';
-import {
-    useGetWorkingHoursQuery,
-    useUpdateWorkingHoursMutation,
-} from '@/app/lib/store/working-hours/api';
-import { defaultWorkingHours } from '@/constants';
+import { scheduleSchema, ScheduleValues } from '@/app/lib/validation/schedule';
+import { useGetScheduleQuery, useUpdateScheduleMutation } from '@/app/lib/store/schedule/api';
+import { defaultSchedule } from '@/constants';
 
 const formatDayName = (day: string) => {
     return day.charAt(0) + day.slice(1).toLowerCase();
 };
 
 export default function WorkingHoursPage() {
-    const { data: response, isLoading, error } = useGetWorkingHoursQuery();
-    const [updateWorkingHours, { isLoading: isUpdating }] = useUpdateWorkingHoursMutation();
+    const { data: response, isLoading, error } = useGetScheduleQuery();
+    const [updateSchedule, { isLoading: isUpdating }] = useUpdateScheduleMutation();
 
-    const form = useForm<WorkingHoursValues>({
+    const form = useForm<ScheduleValues>({
         initialValues: {
-            workingHours: defaultWorkingHours.map((wh) => ({
+            schedule: defaultSchedule.map((wh) => ({
                 ...wh,
                 startTime: wh.startTime.substring(0, 5),
                 endTime: wh.endTime.substring(0, 5),
             })),
         },
-        validate: schemaResolver(workingHoursSchema),
+        validate: schemaResolver(scheduleSchema),
     });
 
     useEffect(() => {
-        if (response?.data?.workingHours) {
+        if (response?.data?.schedule) {
             form.setValues({
-                workingHours: response.data.workingHours.map((wh: any) => ({
+                schedule: response.data.schedule.map((wh: any) => ({
                     ...wh,
                     startTime: wh.startTime.substring(0, 5),
                     endTime: wh.endTime.substring(0, 5),
                 })),
             });
         }
-    }, [response]);
+    }, [response, form]);
 
     if (isLoading || error) {
         return <WorkingHoursLoading />;
     }
 
-    const handleSubmit = async (values: WorkingHoursValues) => {
+    const handleSubmit = async (values: ScheduleValues) => {
         try {
-            const res = await updateWorkingHours(values).unwrap();
+            const res = await updateSchedule(values).unwrap();
             toast.success(res.message || 'Working hours updated successfully');
         } catch (err: any) {
             toast.error(err?.data?.message || 'Failed to update working hours');
@@ -62,7 +59,7 @@ export default function WorkingHoursPage() {
             <div className="max-w-3xl mx-auto bg-white p-2 md:p-6 rounded-xl shadow-sm border border-gray-100">
                 <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
                     <Stack gap={0}>
-                        {form.values.workingHours.map((item, index) => (
+                        {form.values.schedule.map((item, index) => (
                             <div
                                 key={item.dayOfWeek}
                                 className="transition-colors hover:bg-gray-50/50"
@@ -79,7 +76,7 @@ export default function WorkingHoursPage() {
                                             checked={!item.isOffDay}
                                             onChange={(event) =>
                                                 form.setFieldValue(
-                                                    `workingHours.${index}.isOffDay`,
+                                                    `schedule.${index}.isOffDay`,
                                                     !event.currentTarget.checked
                                                 )
                                             }
@@ -118,9 +115,7 @@ export default function WorkingHoursPage() {
                                                     color: 'var(--mantine-color-gray-5)',
                                                 },
                                             }}
-                                            {...form.getInputProps(
-                                                `workingHours.${index}.startTime`
-                                            )}
+                                            {...form.getInputProps(`schedule.${index}.startTime`)}
                                         />
                                         <TextInput
                                             type="time"
@@ -139,11 +134,11 @@ export default function WorkingHoursPage() {
                                                     color: 'var(--mantine-color-gray-5)',
                                                 },
                                             }}
-                                            {...form.getInputProps(`workingHours.${index}.endTime`)}
+                                            {...form.getInputProps(`schedule.${index}.endTime`)}
                                         />
                                     </div>
                                 </div>
-                                {index < form.values.workingHours.length - 1 && (
+                                {index < form.values.schedule.length - 1 && (
                                     <Divider variant="dashed" color="gray.2" />
                                 )}
                             </div>

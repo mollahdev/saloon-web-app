@@ -2,7 +2,7 @@
 import { PropsWithChildren } from 'react';
 import { usePathname } from 'next/navigation';
 import { useGetStaffsQuery } from '@/app/lib/store/staffs/api';
-import { StaffSidebar } from '@/components/dashboard/schedule/StaffSidebar';
+import { StaffSidebar } from '@/components/dashboard/schedule/staff-sidebar';
 
 export default function ScheduleLayout({ children }: PropsWithChildren) {
     const { data: response, isLoading } = useGetStaffsQuery();

@@ -19,23 +19,36 @@ import { useDisclosure } from '@mantine/hooks';
 import { schemaResolver, useForm } from '@mantine/form';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { HiOutlineTrash, HiOutlinePlus, HiOutlineCalendar } from 'react-icons/hi';
+import { HiOutlineTrash, HiOutlinePlus, HiOutlineCalendar, HiOutlinePencil } from 'react-icons/hi';
 import { TbRepeat, TbCoffee, TbCalendarEvent } from 'react-icons/tb';
-import {
-    useGetTimeOffsQuery,
-    useCreateTimeOffMutation,
-    useDeleteTimeOffMutation,
-    TimeOffEntry,
-} from '@/app/lib/store/staffs/time-off-api';
-import { timeOffSchema, TimeOffFormValues } from '@/app/lib/validation/time-off';
+import { TimeOffFormValues, timeOffSchema } from '@/app/lib/validation/time-off';
 import { useConfirmation } from '@/hooks/use-confirmation';
 import dayjs from 'dayjs';
 
-interface TimeOffSectionProps {
-    staffId: string;
+export interface TimeOffData {
+    id?: string;
+    type: string;
+    title?: string;
+    isFullDay?: boolean;
+    startDate?: string;
+    endDate?: string | null;
+    startTime?: string | null;
+    endTime?: string | null;
+    repeatType?: string | null;
+    repeatDay?: number | null;
 }
 
-const typeConfig = {
+interface TimeOffSectionProps {
+    initialValues?: TimeOffData[];
+    onAdd?: (entry: TimeOffData) => void;
+    onRemove?: (id: string) => void;
+    onUpdate?: (id: string, entry: TimeOffData) => void;
+}
+
+const typeConfig: Record<
+    string,
+    { label: string; icon: React.ReactNode; color: string; description: string }
+> = {
     SINGLE: {
         label: 'One-time',
         icon: <TbCalendarEvent size={16} />,
@@ -72,7 +85,7 @@ const dayOfWeekOptions = [
     { value: '6', label: 'Saturday' },
 ];
 
-function formatTimeOffDisplay(entry: TimeOffEntry): string {
+function formatTimeOffDisplay(entry: TimeOffData): string {
     const parts: string[] = [];
 
     if (entry.isFullDay) {
@@ -90,9 +103,13 @@ function formatTimeOffDisplay(entry: TimeOffEntry): string {
 
     if (entry.type === 'RECURRING' && entry.repeatType) {
         const repeatLabel =
-            entry.repeatType === 'WEEKLY' && entry.repeatDay !== null
+            entry.repeatType === 'WEEKLY' &&
+            entry.repeatDay !== null &&
+            entry.repeatDay !== undefined
                 ? `Every ${dayOfWeekOptions[entry.repeatDay]?.label || ''}`
-                : entry.repeatType === 'MONTHLY' && entry.repeatDay !== null
+                : entry.repeatType === 'MONTHLY' &&
+                    entry.repeatDay !== null &&
+                    entry.repeatDay !== undefined
                   ? `Monthly on the ${entry.repeatDay}${getOrdinalSuffix(entry.repeatDay)}`
                   : `Repeats ${entry.repeatType.toLowerCase()}`;
         parts.push(repeatLabel);
@@ -115,15 +132,18 @@ function getOrdinalSuffix(n: number): string {
     }
 }
 
-export default function TimeOffSection({ staffId }: TimeOffSectionProps) {
+export default function TimeOffSection({
+    initialValues,
+    onAdd,
+    onRemove,
+    onUpdate,
+}: TimeOffSectionProps) {
     const [opened, { open, close }] = useDisclosure(false);
-    const { data: response, isLoading } = useGetTimeOffsQuery(staffId);
-    const [createTimeOff, { isLoading: isCreating }] = useCreateTimeOffMutation();
-    const [deleteTimeOff] = useDeleteTimeOffMutation();
     const { confirm } = useConfirmation();
     const [selectedType, setSelectedType] = useState<'SINGLE' | 'BREAK' | 'RECURRING'>('SINGLE');
+    const [editingId, setEditingId] = useState<string | null>(null);
 
-    const timeOffs = response?.data || [];
+    const [timeOffs, setTimeOffs] = useState<TimeOffData[]>(initialValues || []);
 
     const form = useForm<TimeOffFormValues>({
         initialValues: {
@@ -141,9 +161,27 @@ export default function TimeOffSection({ staffId }: TimeOffSectionProps) {
     });
 
     const resetAndOpen = () => {
+        setEditingId(null);
         form.reset();
         setSelectedType('SINGLE');
         form.setFieldValue('type', 'SINGLE');
+        open();
+    };
+
+    const handleEdit = (entry: TimeOffData) => {
+        setEditingId(entry.id || null);
+        setSelectedType((entry.type as 'SINGLE' | 'BREAK' | 'RECURRING') || 'SINGLE');
+        form.setValues({
+            type: (entry.type as any) || 'SINGLE',
+            title: entry.title || '',
+            isFullDay: entry.isFullDay ?? true,
+            startDate: entry.startDate || '',
+            endDate: entry.endDate || null,
+            startTime: entry.startTime || null,
+            endTime: entry.endTime || null,
+            repeatType: (entry.repeatType as any) || null,
+            repeatDay: entry.repeatDay || null,
+        });
         open();
     };
 
@@ -165,31 +203,41 @@ export default function TimeOffSection({ staffId }: TimeOffSectionProps) {
         }
     };
 
-    const handleSubmit = async (values: TimeOffFormValues) => {
-        try {
-            const res = await createTimeOff({ staffId, body: values }).unwrap();
-            toast.success(res.message || 'Time off added successfully');
-            close();
-            form.reset();
-        } catch (err: any) {
-            toast.error(err?.data?.message || 'Failed to add time off');
+    const handleSubmit = (values: TimeOffFormValues) => {
+        if (editingId) {
+            const updatedEntry: TimeOffData = {
+                ...values,
+                id: editingId,
+            };
+            setTimeOffs(timeOffs.map((t) => (t.id === editingId ? updatedEntry : t)));
+            onUpdate?.(editingId, updatedEntry);
+            toast.success('Time off updated successfully');
+        } else {
+            const newEntry: TimeOffData = {
+                ...values,
+                id: crypto.randomUUID(), // Temporary ID for local state
+            };
+            setTimeOffs([...timeOffs, newEntry]);
+            onAdd?.(newEntry);
+            toast.success('Time off added successfully');
         }
+        close();
+        form.reset();
+        setEditingId(null);
     };
 
-    const handleDelete = (entry: TimeOffEntry) => {
+    const handleDelete = (entry: TimeOffData) => {
         confirm({
             title: 'Delete Time Off',
             message: `Are you sure you want to delete "${entry.title}"? This action cannot be undone.`,
             confirmLabel: 'Delete',
             color: 'red',
-            onConfirm: async () => {
-                try {
-                    await deleteTimeOff({ staffId, timeOffId: entry.id }).unwrap();
-                    toast.success('Time off deleted successfully');
-                } catch (error: any) {
-                    toast.error(error?.data?.message || 'Failed to delete time off');
-                    throw error;
+            onConfirm: () => {
+                setTimeOffs(timeOffs.filter((t) => t.id !== entry.id));
+                if (entry.id) {
+                    onRemove?.(entry.id);
                 }
+                toast.success('Time off deleted successfully');
             },
         });
     };
@@ -217,13 +265,7 @@ export default function TimeOffSection({ staffId }: TimeOffSectionProps) {
             </div>
 
             {/* Time off list */}
-            {isLoading ? (
-                <div className="space-y-3">
-                    {[...Array(2)].map((_, i) => (
-                        <div key={i} className="h-16 bg-gray-50 rounded-lg animate-pulse" />
-                    ))}
-                </div>
-            ) : timeOffs.length === 0 ? (
+            {timeOffs.length === 0 ? (
                 <div className="py-8 text-center">
                     <HiOutlineCalendar size={32} className="mx-auto text-gray-300 mb-2" />
                     <Text size="sm" c="dimmed">
@@ -270,17 +312,28 @@ export default function TimeOffSection({ staffId }: TimeOffSectionProps) {
                                     </Text>
                                 </div>
                             </div>
-                            <Tooltip label="Delete" withArrow>
-                                <ActionIcon
-                                    variant="subtle"
-                                    color="red"
-                                    size="sm"
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={() => handleDelete(entry)}
-                                >
-                                    <HiOutlineTrash size={14} />
-                                </ActionIcon>
-                            </Tooltip>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Tooltip label="Edit" withArrow>
+                                    <ActionIcon
+                                        variant="subtle"
+                                        color="blue"
+                                        size="sm"
+                                        onClick={() => handleEdit(entry)}
+                                    >
+                                        <HiOutlinePencil size={14} />
+                                    </ActionIcon>
+                                </Tooltip>
+                                <Tooltip label="Delete" withArrow>
+                                    <ActionIcon
+                                        variant="subtle"
+                                        color="red"
+                                        size="sm"
+                                        onClick={() => handleDelete(entry)}
+                                    >
+                                        <HiOutlineTrash size={14} />
+                                    </ActionIcon>
+                                </Tooltip>
+                            </div>
                         </div>
                     ))}
                 </Stack>
@@ -292,7 +345,7 @@ export default function TimeOffSection({ staffId }: TimeOffSectionProps) {
                 onClose={close}
                 title={
                     <Text fw={700} size="lg">
-                        Add Time Off
+                        {editingId ? 'Edit Time Off' : 'Add Time Off'}
                     </Text>
                 }
                 size="md"
@@ -582,12 +635,8 @@ export default function TimeOffSection({ staffId }: TimeOffSectionProps) {
                             <Button variant="default" onClick={close}>
                                 Cancel
                             </Button>
-                            <Button
-                                type="submit"
-                                loading={isCreating}
-                                loaderProps={{ type: 'dots' }}
-                            >
-                                Add Time Off
+                            <Button type="submit">
+                                {editingId ? 'Update Time Off' : 'Add Time Off'}
                             </Button>
                         </Group>
                     </Stack>

@@ -31,4 +31,5 @@ enum RepeatType {
   DAILY
   WEEKLY
   MONTHLY
+  YEARLY
 }
