@@ -18,7 +18,7 @@ export const workingDayOptions = [
     'SATURDAY',
 ] as const;
 
-export const defaultWorkingHours = workingDayOptions.map((day) => {
+export const defaultSchedule = workingDayOptions.map((day) => {
     return {
         dayOfWeek: day,
         isOffDay: false,

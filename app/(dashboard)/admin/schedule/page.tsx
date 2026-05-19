@@ -3,20 +3,16 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { PageTitle } from '@/utils/portal';
 import ScheduleLoading from './loading';
-import { WorkingHoursValues } from '@/app/lib/validation/working-hours';
-import {
-    useGetWorkingHoursQuery,
-    useUpdateWorkingHoursMutation,
-} from '@/app/lib/store/working-hours/api';
-import { defaultWorkingHours } from '@/constants';
-import TimeOffSection from '@/components/dashboard/TimeOffSection';
-import { SchedulePageHeader } from '@/components/dashboard/schedule/SchedulePageHeader';
-import { WorkingHoursForm } from '@/components/dashboard/schedule/WorkingHoursForm';
+import { ScheduleValues } from '@/app/lib/validation/schedule';
+import { useGetScheduleQuery, useUpdateScheduleMutation } from '@/app/lib/store/schedule/api';
+import TimeOffSection from '@/components/dashboard/time-off-section';
+import { SchedulePageHeader } from '@/components/dashboard/schedule/schedule-page-header';
+import { ScheduleForm } from '@/components/dashboard/schedule/schedule-form';
 
 export default function BusinessSchedulePage() {
     const [activeTab, setActiveTab] = useState<'schedule' | 'timeoff'>('schedule');
-    const { data: response, isLoading, error } = useGetWorkingHoursQuery();
-    const [updateSchedule, { isLoading: isUpdating }] = useUpdateWorkingHoursMutation();
+    const { data: response, isLoading, error } = useGetScheduleQuery();
+    const [updateSchedule, { isLoading: isUpdating }] = useUpdateScheduleMutation();
 
     if (isLoading) {
         return (
@@ -40,7 +36,7 @@ export default function BusinessSchedulePage() {
         );
     }
 
-    const handleSubmit = async (values: WorkingHoursValues) => {
+    const handleSubmit = async (values: ScheduleValues) => {
         try {
             const res = await updateSchedule(values).unwrap();
             toast.success(res.message || 'Business schedule updated successfully');
@@ -50,16 +46,11 @@ export default function BusinessSchedulePage() {
     };
 
     const initialValues =
-        response?.data?.workingHours?.map((wh: any) => ({
+        response?.data?.schedule?.map((wh: any) => ({
             ...wh,
-            startTime: wh.startTime.substring(0, 5),
-            endTime: wh.endTime.substring(0, 5),
-        })) ||
-        defaultWorkingHours.map((wh) => ({
-            ...wh,
-            startTime: wh.startTime.substring(0, 5),
-            endTime: wh.endTime.substring(0, 5),
-        }));
+            startTime: wh.startTime,
+            endTime: wh.endTime,
+        })) || [];
 
     return (
         <div className="max-w-3xl w-full pb-10">
@@ -76,7 +67,7 @@ export default function BusinessSchedulePage() {
 
             {/* Weekly Schedule */}
             {activeTab === 'schedule' && (
-                <WorkingHoursForm
+                <ScheduleForm
                     initialValues={initialValues}
                     onSubmit={handleSubmit}
                     isLoading={isUpdating}

@@ -4,15 +4,15 @@ import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { PageTitle } from '@/utils/portal';
 import ScheduleLoading from '../loading';
-import { WorkingHoursValues } from '@/app/lib/validation/working-hours';
+import { ScheduleValues } from '@/app/lib/validation/schedule';
 import {
     useGetStaffScheduleQuery,
     useUpdateStaffScheduleMutation,
 } from '@/app/lib/store/staffs/schedule-api';
-import { defaultWorkingHours } from '@/constants';
-import TimeOffSection from '@/components/dashboard/TimeOffSection';
-import { SchedulePageHeader } from '@/components/dashboard/schedule/SchedulePageHeader';
-import { WorkingHoursForm } from '@/components/dashboard/schedule/WorkingHoursForm';
+import { defaultSchedule } from '@/constants';
+import TimeOffSection from '@/components/dashboard/time-off-section';
+import { SchedulePageHeader } from '@/components/dashboard/schedule/schedule-page-header';
+import { ScheduleForm } from '@/components/dashboard/schedule/schedule-form';
 
 export default function StaffSchedulePage() {
     const { id } = useParams<{ id: string }>();
@@ -43,7 +43,7 @@ export default function StaffSchedulePage() {
         );
     }
 
-    const handleSubmit = async (values: WorkingHoursValues) => {
+    const handleSubmit = async (values: ScheduleValues) => {
         try {
             const res = await updateSchedule({ staffId: id, body: values }).unwrap();
             toast.success(res.message || 'Schedule updated successfully');
@@ -53,12 +53,12 @@ export default function StaffSchedulePage() {
     };
 
     const initialValues =
-        response?.data?.workingHours?.map((wh: any) => ({
+        response?.data?.schedule?.map((wh: any) => ({
             ...wh,
             startTime: wh.startTime.substring(0, 5),
             endTime: wh.endTime.substring(0, 5),
         })) ||
-        defaultWorkingHours.map((wh) => ({
+        defaultSchedule.map((wh) => ({
             ...wh,
             startTime: wh.startTime.substring(0, 5),
             endTime: wh.endTime.substring(0, 5),
@@ -83,7 +83,7 @@ export default function StaffSchedulePage() {
 
             {/* Weekly Schedule */}
             {activeTab === 'schedule' && (
-                <WorkingHoursForm
+                <ScheduleForm
                     initialValues={initialValues}
                     onSubmit={handleSubmit}
                     isLoading={isUpdating}

@@ -1,7 +1,7 @@
 import { prisma } from '@/app/lib/db';
 import bcrypt from 'bcryptjs';
 import { passwordSaltRounds } from '@/constants';
-import { defaultWorkingHours } from '@/constants';
+import { defaultSchedule } from '@/constants';
 
 interface DefaultUserProps {
     email: string;
@@ -27,7 +27,7 @@ export const generateDefaultUser = async (props: DefaultUserProps) => {
     });
 
     // insert default working hours
-    for (const day of defaultWorkingHours) {
+    for (const day of defaultSchedule) {
         await prisma.businessWeeklyHour.upsert({
             where: {
                 dayOfWeek: day.dayOfWeek,

@@ -3,11 +3,11 @@
 import { Button, Divider, TextInput, Switch, Stack, Text } from '@mantine/core';
 import { useEffect } from 'react';
 import { schemaResolver, useForm } from '@mantine/form';
-import { workingHoursSchema, WorkingHoursValues } from '@/app/lib/validation/working-hours';
+import { ScheduleSchema, ScheduleValues } from '@/app/lib/validation/schedule';
 
-interface WorkingHoursFormProps {
-    initialValues: WorkingHoursValues['workingHours'];
-    onSubmit: (values: WorkingHoursValues) => Promise<void>;
+interface ScheduleFormProps {
+    initialValues: ScheduleValues['schedule'];
+    onSubmit: (values: ScheduleValues) => Promise<void>;
     isLoading: boolean;
     submitLabel: string;
 }
@@ -16,22 +16,22 @@ const formatDayName = (day: string) => {
     return day.charAt(0) + day.slice(1).toLowerCase();
 };
 
-export function WorkingHoursForm({
+export function ScheduleForm({
     initialValues,
     onSubmit,
     isLoading,
     submitLabel,
-}: WorkingHoursFormProps) {
-    const form = useForm<WorkingHoursValues>({
+}: ScheduleFormProps) {
+    const form = useForm<ScheduleValues>({
         initialValues: {
-            workingHours: initialValues,
+            schedule: initialValues,
         },
-        validate: schemaResolver(workingHoursSchema),
+        validate: schemaResolver(ScheduleSchema),
     });
 
     useEffect(() => {
         if (initialValues && initialValues.length > 0) {
-            form.setValues({ workingHours: initialValues });
+            form.setValues({ schedule: initialValues });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialValues]);
@@ -40,7 +40,7 @@ export function WorkingHoursForm({
         <div className="bg-white p-2 md:p-6 rounded-xl shadow-sm border border-gray-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <form onSubmit={form.onSubmit(onSubmit)} noValidate>
                 <Stack gap={0}>
-                    {form.values.workingHours.map((item, index) => (
+                    {form.values.schedule.map((item, index) => (
                         <div key={item.dayOfWeek} className="transition-colors hover:bg-gray-50/50">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 p-2 md:p-3">
                                 <div className="flex flex-row-reverse sm:flex-row items-center justify-between sm:justify-start gap-6 sm:gap-12 flex-1">
@@ -54,7 +54,7 @@ export function WorkingHoursForm({
                                         checked={!item.isOffDay}
                                         onChange={(event) =>
                                             form.setFieldValue(
-                                                `workingHours.${index}.isOffDay`,
+                                                `schedule.${index}.isOffDay`,
                                                 !event.currentTarget.checked
                                             )
                                         }
@@ -84,7 +84,7 @@ export function WorkingHoursForm({
                                         className="time-picker-no-icon w-[48%] sm:w-36"
                                         onClick={(event) => event.currentTarget.showPicker()}
                                         styles={textInputStyles}
-                                        {...form.getInputProps(`workingHours.${index}.startTime`)}
+                                        {...form.getInputProps(`schedule.${index}.startTime`)}
                                     />
                                     <TextInput
                                         type="time"
@@ -94,11 +94,11 @@ export function WorkingHoursForm({
                                         className="time-picker-no-icon w-[48%] sm:w-36"
                                         onClick={(event) => event.currentTarget.showPicker()}
                                         styles={textInputStyles}
-                                        {...form.getInputProps(`workingHours.${index}.endTime`)}
+                                        {...form.getInputProps(`schedule.${index}.endTime`)}
                                     />
                                 </div>
                             </div>
-                            {index < form.values.workingHours.length - 1 && (
+                            {index < form.values.schedule.length - 1 && (
                                 <Divider variant="dashed" color="gray.2" />
                             )}
                         </div>
