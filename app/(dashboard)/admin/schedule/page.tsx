@@ -12,10 +12,9 @@ import {
     useUpdateBusinessTimeOffMutation,
     useDeleteBusinessTimeOffMutation,
 } from '@/app/lib/store/schedule/api';
-import TimeOffSection from '@/components/dashboard/time-off-section';
+import TimeOffSection, { TimeOffData } from '@/components/dashboard/time-off-section';
 import { SchedulePageHeader } from '@/components/dashboard/schedule/schedule-page-header';
 import { ScheduleForm } from '@/components/dashboard/schedule/schedule-form';
-import { TimeOffData } from '@/components/dashboard/time-off-section';
 
 export default function BusinessSchedulePage() {
     const [activeTab, setActiveTab] = useState<'schedule' | 'timeoff'>('schedule');
@@ -25,7 +24,6 @@ export default function BusinessSchedulePage() {
     const [createTimeOff] = useCreateBusinessTimeOffMutation();
     const [updateTimeOff] = useUpdateBusinessTimeOffMutation();
     const [deleteTimeOff] = useDeleteBusinessTimeOffMutation();
-    const [timeOffData, setTimeOffData] = useState<TimeOffData[]>(() => timeOffRes?.data || []);
 
     if (isLoading || isLoadingTimeOff) {
         return (
@@ -60,28 +58,23 @@ export default function BusinessSchedulePage() {
 
     const handleAddTimeOff = async (entry: TimeOffData) => {
         try {
-            const res = await createTimeOff(entry).unwrap();
-            setTimeOffData((prev) => [...prev, res.data]);
+            await createTimeOff(entry).unwrap();
         } catch (err: any) {
             toast.error(err?.data?.message || 'Failed to add time off');
         }
     };
 
     const handleRemoveTimeOff = async (id: string) => {
-        if (!id || id.length < 15) return; // Only delete if it's a real ID
         try {
             await deleteTimeOff(id).unwrap();
-            setTimeOffData((prev) => prev.filter((t) => t.id !== id));
         } catch (err: any) {
             toast.error(err?.data?.message || 'Failed to remove time off');
         }
     };
 
     const handleUpdateTimeOff = async (id: string, entry: TimeOffData) => {
-        if (!id || id.length < 15) return; // Only update if it's a real ID
         try {
-            const res = await updateTimeOff({ id, body: entry }).unwrap();
-            setTimeOffData((prev) => prev.map((t) => (t.id === id ? res.data : t)));
+            await updateTimeOff({ id, body: entry }).unwrap();
         } catch (err: any) {
             toast.error(err?.data?.message || 'Failed to update time off');
         }
@@ -123,7 +116,7 @@ export default function BusinessSchedulePage() {
             {activeTab === 'timeoff' && (
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <TimeOffSection
-                        initialValues={timeOffData}
+                        initialValues={timeOffRes?.data || []}
                         onAdd={handleAddTimeOff}
                         onRemove={handleRemoveTimeOff}
                         onUpdate={handleUpdateTimeOff}
