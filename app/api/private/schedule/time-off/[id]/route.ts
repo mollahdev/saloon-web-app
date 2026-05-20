@@ -3,7 +3,7 @@ import { prisma } from '@/app/lib/db';
 import { isAdminOrOwner, isActiveStatus } from '@/app/lib/permissions';
 import { timeOffSchema } from '@/app/lib/validation/time-off';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const userId = request.headers.get('x-user-id') as string;
         const user = await prisma.user.findUnique({
@@ -15,7 +15,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
-        const timeOffId = params.id;
+        const { id: timeOffId } = await params;
         const body = await request.json();
         const val = timeOffSchema.safeParse(body);
 
@@ -61,7 +61,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const userId = request.headers.get('x-user-id') as string;
         const user = await prisma.user.findUnique({
@@ -73,7 +73,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
-        const timeOffId = params.id;
+        const { id: timeOffId } = await params;
 
         const existing = await prisma.businessTimeOff.findUnique({ where: { id: timeOffId } });
         if (!existing) {

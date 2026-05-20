@@ -97,7 +97,9 @@ function formatTimeOffDisplay(entry: TimeOffData): string {
     } else {
         parts.push(dayjs(entry.startDate).format('MMM D, YYYY'));
         if (entry.startTime && entry.endTime) {
-            parts.push(`${entry.startTime.substring(0, 5)} – ${entry.endTime.substring(0, 5)}`);
+            const start12 = dayjs(`1970-01-01T${entry.startTime.substring(0, 5)}`).format('h:mm A');
+            const end12 = dayjs(`1970-01-01T${entry.endTime.substring(0, 5)}`).format('h:mm A');
+            parts.push(`${start12} – ${end12}`);
         }
     }
 
