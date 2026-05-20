@@ -9,13 +9,13 @@ export const timezones = 'America/New_York';
 export const passwordSaltRounds = 10;
 
 export const workingDayOptions = [
-    'SUNDAY',
     'MONDAY',
     'TUESDAY',
     'WEDNESDAY',
     'THURSDAY',
     'FRIDAY',
     'SATURDAY',
+    'SUNDAY',
 ] as const;
 
 export const defaultSchedule = workingDayOptions.map((day) => {

@@ -1,5 +1,6 @@
 'use client';
-import { Button, Divider, TextInput, Switch, Stack, Text } from '@mantine/core';
+import { Button, Divider, Switch, Stack, Text } from '@mantine/core';
+import ScheduleTimePicker from '@/components/dashboard/schedule-time-picker';
 import { useEffect } from 'react';
 import { schemaResolver, useForm } from '@mantine/form';
 import toast from 'react-hot-toast';
@@ -98,15 +99,20 @@ export default function WorkingHoursPage() {
                                     </div>
 
                                     <div className="flex gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
-                                        <TextInput
-                                            type="time"
+                                        <ScheduleTimePicker
                                             label="Opening"
                                             size="sm"
                                             disabled={item.isOffDay}
-                                            className="time-picker-no-icon w-[48%] sm:w-36"
-                                            onClick={(event) => event.currentTarget.showPicker()}
+                                            className="w-[48%] sm:w-36"
+                                            value={form.values.schedule[index].startTime ?? ''}
+                                            onChange={(value) =>
+                                                form.setFieldValue(
+                                                    `schedule.${index}.startTime`,
+                                                    value
+                                                )
+                                            }
+                                            error={form.errors[`schedule.${index}.startTime`]}
                                             styles={{
-                                                input: { cursor: 'pointer' },
                                                 label: {
                                                     marginBottom: 4,
                                                     fontSize: 11,
@@ -115,17 +121,21 @@ export default function WorkingHoursPage() {
                                                     color: 'var(--mantine-color-gray-5)',
                                                 },
                                             }}
-                                            {...form.getInputProps(`schedule.${index}.startTime`)}
                                         />
-                                        <TextInput
-                                            type="time"
+                                        <ScheduleTimePicker
                                             label="Closing"
                                             size="sm"
                                             disabled={item.isOffDay}
-                                            className="time-picker-no-icon w-[48%] sm:w-36"
-                                            onClick={(event) => event.currentTarget.showPicker()}
+                                            className="w-[48%] sm:w-36"
+                                            value={form.values.schedule[index].endTime ?? ''}
+                                            onChange={(value) =>
+                                                form.setFieldValue(
+                                                    `schedule.${index}.endTime`,
+                                                    value
+                                                )
+                                            }
+                                            error={form.errors[`schedule.${index}.endTime`]}
                                             styles={{
-                                                input: { cursor: 'pointer' },
                                                 label: {
                                                     marginBottom: 4,
                                                     fontSize: 11,
@@ -134,7 +144,6 @@ export default function WorkingHoursPage() {
                                                     color: 'var(--mantine-color-gray-5)',
                                                 },
                                             }}
-                                            {...form.getInputProps(`schedule.${index}.endTime`)}
                                         />
                                     </div>
                                 </div>

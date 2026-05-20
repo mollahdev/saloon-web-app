@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { PageTitle } from '@/utils/portal';
 import { useDisclosure } from '@mantine/hooks';
 import { useConfirmation } from '@/hooks/use-confirmation';
+import { workingDayOptions } from '@/constants';
 import ScheduleLoading from './loading';
 import { ScheduleValues } from '@/app/lib/validation/schedule';
 import {
@@ -113,11 +114,17 @@ export default function BusinessSchedulePage() {
 
     const initialValues = {
         schedule:
-            response?.data?.schedule?.map((wh: any) => ({
-                ...wh,
-                startTime: wh.startTime,
-                endTime: wh.endTime,
-            })) || [],
+            response?.data?.schedule
+                ?.map((wh: any) => ({
+                    ...wh,
+                    startTime: wh.startTime,
+                    endTime: wh.endTime,
+                }))
+                .sort(
+                    (a: any, b: any) =>
+                        workingDayOptions.indexOf(a.dayOfWeek) -
+                        workingDayOptions.indexOf(b.dayOfWeek)
+                ) || [],
     };
 
     return (

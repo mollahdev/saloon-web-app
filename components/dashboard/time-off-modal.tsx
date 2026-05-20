@@ -11,7 +11,6 @@ import {
     Group,
     Divider,
 } from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
 import { schemaResolver, useForm } from '@mantine/form';
 import { useState, useCallback } from 'react';
 import { TbRepeat, TbCoffee, TbCalendarEvent } from 'react-icons/tb';
@@ -19,6 +18,8 @@ import { TimeOffFormValues, timeOffSchema } from '@/app/lib/validation/time-off'
 import { REPEAT_OPTIONS, DAY_OF_WEEK_OPTIONS } from '@/constants';
 import dayjs from 'dayjs';
 import { TimeOffData } from './time-off-section';
+import ScheduleDatePicker from './schedule-date-picker';
+import ScheduleTimePicker from './schedule-time-picker';
 
 const typeConfig: Record<
     string,
@@ -249,7 +250,7 @@ export default function TimeOffModal({
 
                     {/* Date selection */}
                     <Group grow>
-                        <DatePickerInput
+                        <ScheduleDatePicker
                             label="Start Date"
                             placeholder="Pick date"
                             value={form.values.startDate ? new Date(form.values.startDate) : null}
@@ -266,7 +267,7 @@ export default function TimeOffModal({
 
                         {/* End date — only for SINGLE type with multi-day support */}
                         {selectedType === 'SINGLE' && (
-                            <DatePickerInput
+                            <ScheduleDatePicker
                                 label="End Date"
                                 placeholder="Optional"
                                 value={form.values.endDate ? new Date(form.values.endDate) : null}
@@ -291,27 +292,19 @@ export default function TimeOffModal({
                     {/* Time range — shown when not full day or BREAK type */}
                     {(!form.values.isFullDay || selectedType === 'BREAK') && (
                         <Group grow>
-                            <TextInput
-                                type="time"
+                            <ScheduleTimePicker
                                 label="Start Time"
-                                className="time-picker-no-icon"
-                                onClick={(event) => event.currentTarget.showPicker()}
-                                {...form.getInputProps('startTime')}
-                                styles={{
-                                    input: { cursor: 'pointer' },
-                                    label: labelStyles,
-                                }}
+                                value={form.values.startTime ?? ''}
+                                onChange={(value) => form.setFieldValue('startTime', value)}
+                                error={form.errors.startTime}
+                                styles={{ label: labelStyles }}
                             />
-                            <TextInput
-                                type="time"
+                            <ScheduleTimePicker
                                 label="End Time"
-                                className="time-picker-no-icon"
-                                onClick={(event) => event.currentTarget.showPicker()}
-                                {...form.getInputProps('endTime')}
-                                styles={{
-                                    input: { cursor: 'pointer' },
-                                    label: labelStyles,
-                                }}
+                                value={form.values.endTime ?? ''}
+                                onChange={(value) => form.setFieldValue('endTime', value)}
+                                error={form.errors.endTime}
+                                styles={{ label: labelStyles }}
                             />
                         </Group>
                     )}

@@ -1,9 +1,10 @@
 'use client';
 
-import { Button, Divider, TextInput, Switch, Stack, Text } from '@mantine/core';
+import { Button, Divider, Switch, Stack, Text } from '@mantine/core';
 import { useEffect } from 'react';
 import { schemaResolver, useForm } from '@mantine/form';
 import { ScheduleSchema, ScheduleValues } from '@/app/lib/validation/schedule';
+import ScheduleTimePicker from '@/components/dashboard/schedule-time-picker';
 
 interface ScheduleFormProps {
     initialValues: ScheduleValues['schedule'];
@@ -76,25 +77,29 @@ export function ScheduleForm({
                                 </div>
 
                                 <div className="flex gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
-                                    <TextInput
-                                        type="time"
+                                    <ScheduleTimePicker
                                         label="Opening"
                                         size="sm"
                                         disabled={item.isOffDay}
-                                        className="time-picker-no-icon w-[48%] sm:w-36"
-                                        onClick={(event) => event.currentTarget.showPicker()}
-                                        styles={textInputStyles}
-                                        {...form.getInputProps(`schedule.${index}.startTime`)}
+                                        className="w-[48%] sm:w-36"
+                                        value={form.values.schedule[index].startTime ?? ''}
+                                        onChange={(value) =>
+                                            form.setFieldValue(`schedule.${index}.startTime`, value)
+                                        }
+                                        error={form.errors[`schedule.${index}.startTime`]}
+                                        styles={labelStyles}
                                     />
-                                    <TextInput
-                                        type="time"
+                                    <ScheduleTimePicker
                                         label="Closing"
                                         size="sm"
                                         disabled={item.isOffDay}
-                                        className="time-picker-no-icon w-[48%] sm:w-36"
-                                        onClick={(event) => event.currentTarget.showPicker()}
-                                        styles={textInputStyles}
-                                        {...form.getInputProps(`schedule.${index}.endTime`)}
+                                        className="w-[48%] sm:w-36"
+                                        value={form.values.schedule[index].endTime ?? ''}
+                                        onChange={(value) =>
+                                            form.setFieldValue(`schedule.${index}.endTime`, value)
+                                        }
+                                        error={form.errors[`schedule.${index}.endTime`]}
+                                        styles={labelStyles}
                                     />
                                 </div>
                             </div>
@@ -123,8 +128,7 @@ export function ScheduleForm({
     );
 }
 
-const textInputStyles = {
-    input: { cursor: 'pointer' },
+const labelStyles = {
     label: {
         marginBottom: 4,
         fontSize: 11,
