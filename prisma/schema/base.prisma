@@ -23,7 +23,6 @@ enum DayOfWeek {
 
 enum TimeOffType {
   SINGLE
-  BREAK
   RECURRING
 }
 

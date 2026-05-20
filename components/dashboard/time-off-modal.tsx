@@ -13,7 +13,7 @@ import {
 } from '@mantine/core';
 import { schemaResolver, useForm } from '@mantine/form';
 import { useState, useCallback } from 'react';
-import { TbRepeat, TbCoffee, TbCalendarEvent } from 'react-icons/tb';
+import { TbRepeat, TbCalendarEvent } from 'react-icons/tb';
 import { TimeOffFormValues, timeOffSchema } from '@/app/lib/validation/time-off';
 import { REPEAT_OPTIONS, DAY_OF_WEEK_OPTIONS } from '@/constants';
 import dayjs from 'dayjs';
@@ -30,12 +30,6 @@ const typeConfig: Record<
         icon: <TbCalendarEvent size={16} />,
         color: 'blue',
         description: 'Single day or date range',
-    },
-    BREAK: {
-        label: 'Break',
-        icon: <TbCoffee size={16} />,
-        color: 'orange',
-        description: 'Time range within a day',
     },
     RECURRING: {
         label: 'Recurring',
@@ -74,8 +68,8 @@ interface TimeOffModalProps {
     editingEntry?: TimeOffData | null;
 }
 
-function getInitialType(entry?: TimeOffData | null): 'SINGLE' | 'BREAK' | 'RECURRING' {
-    return (entry?.type as 'SINGLE' | 'BREAK' | 'RECURRING') || 'SINGLE';
+function getInitialType(entry?: TimeOffData | null): 'SINGLE' | 'RECURRING' {
+    return (entry?.type as 'SINGLE' | 'RECURRING') || 'SINGLE';
 }
 
 function getInitialFormValues(entry?: TimeOffData | null): TimeOffFormValues {
@@ -111,7 +105,7 @@ export default function TimeOffModal({
     onSubmit,
     editingEntry,
 }: TimeOffModalProps) {
-    const [selectedType, setSelectedType] = useState<'SINGLE' | 'BREAK' | 'RECURRING'>(() =>
+    const [selectedType, setSelectedType] = useState<'SINGLE' | 'RECURRING'>(() =>
         getInitialType(editingEntry)
     );
 
@@ -129,15 +123,12 @@ export default function TimeOffModal({
     }, [editingEntry]);
 
     const handleTypeChange = (value: string) => {
-        const type = value as 'SINGLE' | 'BREAK' | 'RECURRING';
+        const type = value as 'SINGLE' | 'RECURRING';
         setSelectedType(type);
         form.setFieldValue('type', type);
 
         // Adjust defaults based on type
-        if (type === 'BREAK') {
-            form.setFieldValue('isFullDay', false);
-            form.setFieldValue('endDate', null);
-        } else if (type === 'RECURRING') {
+        if (type === 'RECURRING') {
             form.setFieldValue('endDate', null);
         } else {
             form.setFieldValue('isFullDay', true);
@@ -192,15 +183,6 @@ export default function TimeOffModal({
                                     ),
                                 },
                                 {
-                                    value: 'BREAK',
-                                    label: (
-                                        <div className="flex items-center gap-1.5 justify-center py-0.5">
-                                            <TbCoffee size={15} />
-                                            <span className="text-xs font-semibold">Break</span>
-                                        </div>
-                                    ),
-                                },
-                                {
                                     value: 'RECURRING',
                                     label: (
                                         <div className="flex items-center gap-1.5 justify-center py-0.5">
@@ -229,24 +211,22 @@ export default function TimeOffModal({
                         styles={{ label: labelStyles }}
                     />
 
-                    {/* Full day toggle — hidden for BREAK type */}
-                    {selectedType !== 'BREAK' && (
-                        <Switch
-                            label="Full day"
-                            checked={form.values.isFullDay}
-                            onChange={(event) =>
-                                form.setFieldValue('isFullDay', event.currentTarget.checked)
-                            }
-                            color="teal"
-                            styles={{
-                                track: { cursor: 'pointer' },
-                                label: {
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                },
-                            }}
-                        />
-                    )}
+                    {/* Full day toggle */}
+                    <Switch
+                        label="Full day"
+                        checked={form.values.isFullDay}
+                        onChange={(event) =>
+                            form.setFieldValue('isFullDay', event.currentTarget.checked)
+                        }
+                        color="teal"
+                        styles={{
+                            track: { cursor: 'pointer' },
+                            label: {
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                            },
+                        }}
+                    />
 
                     {/* Date selection */}
                     <Group grow>
@@ -269,7 +249,9 @@ export default function TimeOffModal({
                         {selectedType === 'SINGLE' && (
                             <ScheduleDatePicker
                                 label="End Date"
-                                placeholder="Optional"
+                                placeholder={
+                                    form.values.startDate ? 'Optional' : 'Select start date first'
+                                }
                                 value={form.values.endDate ? new Date(form.values.endDate) : null}
                                 onChange={(date) =>
                                     form.setFieldValue(
@@ -283,27 +265,54 @@ export default function TimeOffModal({
                                         ? new Date(form.values.startDate)
                                         : new Date()
                                 }
+                                disabled={!form.values.startDate}
                                 clearable
                                 styles={{ label: labelStyles }}
                             />
                         )}
                     </Group>
 
-                    {/* Time range — shown when not full day or BREAK type */}
-                    {(!form.values.isFullDay || selectedType === 'BREAK') && (
+                    {/* Time range — shown when not full day */}
+                    {!form.values.isFullDay && (
                         <Group grow>
                             <ScheduleTimePicker
                                 label="Start Time"
                                 value={form.values.startTime ?? ''}
-                                onChange={(value) => form.setFieldValue('startTime', value)}
+                                onChange={(value) => {
+                                    form.setFieldValue('startTime', value);
+                                    // Clear end time if it's now invalid (same or before start)
+                                    if (
+                                        value &&
+                                        form.values.endTime &&
+                                        value >= form.values.endTime
+                                    ) {
+                                        form.setFieldValue('endTime', null);
+                                    }
+                                }}
                                 error={form.errors.startTime}
                                 styles={{ label: labelStyles }}
                             />
                             <ScheduleTimePicker
                                 label="End Time"
                                 value={form.values.endTime ?? ''}
-                                onChange={(value) => form.setFieldValue('endTime', value)}
+                                onChange={(value) => {
+                                    // Only accept if end time is strictly after start time
+                                    if (
+                                        value &&
+                                        form.values.startTime &&
+                                        value <= form.values.startTime
+                                    ) {
+                                        form.setFieldError(
+                                            'endTime',
+                                            'End time must be after start time'
+                                        );
+                                        return;
+                                    }
+                                    form.clearFieldError('endTime');
+                                    form.setFieldValue('endTime', value);
+                                }}
                                 error={form.errors.endTime}
+                                disabled={!form.values.startTime}
                                 styles={{ label: labelStyles }}
                             />
                         </Group>

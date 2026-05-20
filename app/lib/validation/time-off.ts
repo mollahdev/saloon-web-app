@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const timeOffTypeEnum = z.enum(['SINGLE', 'BREAK', 'RECURRING']);
+export const timeOffTypeEnum = z.enum(['SINGLE', 'RECURRING']);
 export const repeatTypeEnum = z.enum(['DAILY', 'WEEKLY', 'MONTHLY']);
 
 export const timeOffSchema = z

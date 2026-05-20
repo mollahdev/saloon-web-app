@@ -1,7 +1,7 @@
 'use client';
 import { Button, Stack, Text, Badge, ActionIcon, Tooltip } from '@mantine/core';
 import { HiOutlineTrash, HiOutlinePlus, HiOutlineCalendar, HiOutlinePencil } from 'react-icons/hi';
-import { TbRepeat, TbCoffee, TbCalendarEvent } from 'react-icons/tb';
+import { TbRepeat, TbCalendarEvent } from 'react-icons/tb';
 import { DAY_OF_WEEK_OPTIONS } from '@/constants';
 import dayjs from 'dayjs';
 import TimeOffModal from './time-off-modal';
@@ -40,12 +40,7 @@ const typeConfig: Record<
         color: 'blue',
         description: 'Single day or date range',
     },
-    BREAK: {
-        label: 'Break',
-        icon: <TbCoffee size={16} />,
-        color: 'orange',
-        description: 'Time range within a day',
-    },
+
     RECURRING: {
         label: 'Recurring',
         icon: <TbRepeat size={16} />,

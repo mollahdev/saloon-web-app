@@ -4,7 +4,7 @@ import { TimeOffFormValues } from '@/app/lib/validation/time-off';
 export interface TimeOffEntry {
     id: string;
     userId: string;
-    type: 'SINGLE' | 'BREAK' | 'RECURRING';
+    type: 'SINGLE' | 'RECURRING';
     title: string;
     isFullDay: boolean;
     startDate: string;
