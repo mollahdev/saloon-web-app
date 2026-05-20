@@ -3,14 +3,23 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { PageTitle } from '@/utils/portal';
+import { useDisclosure } from '@mantine/hooks';
+import { useConfirmation } from '@/hooks/use-confirmation';
 import ScheduleLoading from '../loading';
 import { ScheduleValues } from '@/app/lib/validation/schedule';
 import {
     useGetStaffScheduleQuery,
     useUpdateStaffScheduleMutation,
 } from '@/app/lib/store/staffs/schedule-api';
+import {
+    useGetTimeOffsQuery,
+    useCreateTimeOffMutation,
+    useUpdateTimeOffMutation,
+    useDeleteTimeOffMutation,
+} from '@/app/lib/store/staffs/time-off-api';
+import { TimeOffFormValues } from '@/app/lib/validation/time-off';
 import { defaultSchedule } from '@/constants';
-import TimeOffSection from '@/components/dashboard/time-off-section';
+import TimeOffSection, { TimeOffData } from '@/components/dashboard/time-off-section';
 import { SchedulePageHeader } from '@/components/dashboard/schedule/schedule-page-header';
 import { ScheduleForm } from '@/components/dashboard/schedule/schedule-form';
 
@@ -18,10 +27,19 @@ export default function StaffSchedulePage() {
     const { id } = useParams<{ id: string }>();
     const [activeTab, setActiveTab] = useState<'schedule' | 'timeoff'>('schedule');
     const { data: response, isLoading, error } = useGetStaffScheduleQuery(id);
+    const { data: timeOffRes, isLoading: isLoadingTimeOff } = useGetTimeOffsQuery(id);
     const [updateSchedule, { isLoading: isUpdating }] = useUpdateStaffScheduleMutation();
+    const [createTimeOff] = useCreateTimeOffMutation();
+    const [updateTimeOff] = useUpdateTimeOffMutation();
+    const [deleteTimeOff] = useDeleteTimeOffMutation();
     const staff = response?.data?.staff;
 
-    if (isLoading) {
+    // Time off modal state — managed here, passed down to TimeOffSection
+    const [opened, { open, close }] = useDisclosure(false);
+    const [editingEntry, setEditingEntry] = useState<TimeOffData | null>(null);
+    const { confirm } = useConfirmation();
+
+    if (isLoading || isLoadingTimeOff) {
         return (
             <>
                 <PageTitle.Source>Schedule</PageTitle.Source>
@@ -50,6 +68,64 @@ export default function StaffSchedulePage() {
         } catch (err: any) {
             toast.error(err?.data?.message || 'Failed to update schedule');
         }
+    };
+
+    const handleOpenAdd = () => {
+        setEditingEntry(null);
+        open();
+    };
+
+    const handleEdit = (entry: TimeOffData) => {
+        setEditingEntry(entry);
+        open();
+    };
+
+    const handleModalSubmit = async (entry: TimeOffData) => {
+        if (editingEntry?.id) {
+            try {
+                const res = await updateTimeOff({
+                    staffId: id,
+                    timeOffId: editingEntry.id,
+                    body: entry as TimeOffFormValues,
+                }).unwrap();
+                toast.success(res.message || 'Time off updated successfully');
+            } catch (err: any) {
+                toast.error(err?.data?.message || 'Failed to update time off');
+            }
+        } else {
+            try {
+                const res = await createTimeOff({
+                    staffId: id,
+                    body: entry as TimeOffFormValues,
+                }).unwrap();
+                toast.success(res.message || 'Time off added successfully');
+            } catch (err: any) {
+                toast.error(err?.data?.message || 'Failed to add time off');
+            }
+        }
+        setEditingEntry(null);
+    };
+
+    const handleDelete = (entry: TimeOffData) => {
+        confirm({
+            title: 'Delete Time Off',
+            message: `Are you sure you want to delete "${entry.title}"? This action cannot be undone.`,
+            confirmLabel: 'Delete',
+            color: 'red',
+            onConfirm: async () => {
+                try {
+                    if (entry.id) {
+                        const res = await deleteTimeOff({
+                            staffId: id,
+                            timeOffId: entry.id,
+                        }).unwrap();
+                        toast.success(res.message || 'Time off deleted successfully');
+                    }
+                } catch (err: any) {
+                    toast.error(err?.data?.message || 'Failed to remove time off');
+                }
+            },
+        });
     };
 
     const initialValues =
@@ -92,7 +168,18 @@ export default function StaffSchedulePage() {
             )}
 
             {/* Time Off */}
-            {activeTab === 'timeoff' && <TimeOffSection initialValues={[]} />}
+            {activeTab === 'timeoff' && (
+                <TimeOffSection
+                    entries={timeOffRes?.data || []}
+                    opened={opened}
+                    editingEntry={editingEntry}
+                    onOpenAdd={handleOpenAdd}
+                    onEdit={handleEdit}
+                    onClose={close}
+                    onSubmit={handleModalSubmit}
+                    onDelete={handleDelete}
+                />
+            )}
         </div>
     );
 }

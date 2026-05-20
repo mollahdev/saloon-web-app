@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { PageTitle } from '@/utils/portal';
+import { useDisclosure } from '@mantine/hooks';
+import { useConfirmation } from '@/hooks/use-confirmation';
 import ScheduleLoading from './loading';
 import { ScheduleValues } from '@/app/lib/validation/schedule';
 import {
@@ -24,6 +26,11 @@ export default function BusinessSchedulePage() {
     const [createTimeOff] = useCreateBusinessTimeOffMutation();
     const [updateTimeOff] = useUpdateBusinessTimeOffMutation();
     const [deleteTimeOff] = useDeleteBusinessTimeOffMutation();
+
+    // Time off modal state — managed here, passed down to TimeOffSection
+    const [opened, { open, close }] = useDisclosure(false);
+    const [editingEntry, setEditingEntry] = useState<TimeOffData | null>(null);
+    const { confirm } = useConfirmation();
 
     if (isLoading || isLoadingTimeOff) {
         return (
@@ -50,34 +57,58 @@ export default function BusinessSchedulePage() {
     const handleScheduleSubmit = async (values: ScheduleValues) => {
         try {
             const res = await updateSchedule(values).unwrap();
-            toast.success(res.message || 'Business schedule updated successfully');
+            toast.success(res.message);
         } catch (err: any) {
-            toast.error(err?.data?.message || 'Failed to update business schedule');
+            toast.error(err?.data?.message);
         }
     };
 
-    const handleAddTimeOff = async (entry: TimeOffData) => {
-        try {
-            await createTimeOff(entry).unwrap();
-        } catch (err: any) {
-            toast.error(err?.data?.message || 'Failed to add time off');
-        }
+    const handleOpenAdd = () => {
+        setEditingEntry(null);
+        open();
     };
 
-    const handleRemoveTimeOff = async (id: string) => {
-        try {
-            await deleteTimeOff(id).unwrap();
-        } catch (err: any) {
-            toast.error(err?.data?.message || 'Failed to remove time off');
-        }
+    const handleEdit = (entry: TimeOffData) => {
+        setEditingEntry(entry);
+        open();
     };
 
-    const handleUpdateTimeOff = async (id: string, entry: TimeOffData) => {
-        try {
-            await updateTimeOff({ id, body: entry }).unwrap();
-        } catch (err: any) {
-            toast.error(err?.data?.message || 'Failed to update time off');
+    const handleModalSubmit = async (entry: TimeOffData) => {
+        if (editingEntry?.id) {
+            try {
+                const res = await updateTimeOff({ id: editingEntry.id, body: entry }).unwrap();
+                toast.success(res.message || 'Time off updated successfully');
+            } catch (err: any) {
+                toast.error(err?.data?.message);
+            }
+        } else {
+            try {
+                const res = await createTimeOff(entry).unwrap();
+                toast.success(res.message);
+            } catch (err: any) {
+                toast.error(err?.data?.message);
+            }
         }
+        setEditingEntry(null);
+    };
+
+    const handleDelete = (entry: TimeOffData) => {
+        confirm({
+            title: 'Delete Time Off',
+            message: `Are you sure you want to delete "${entry.title}"? This action cannot be undone.`,
+            confirmLabel: 'Delete',
+            color: 'red',
+            onConfirm: async () => {
+                try {
+                    if (entry.id) {
+                        const res = await deleteTimeOff(entry.id).unwrap();
+                        toast.success(res.message);
+                    }
+                } catch (err: any) {
+                    toast.error(err?.data?.message);
+                }
+            },
+        });
     };
 
     const initialValues = {
@@ -116,10 +147,14 @@ export default function BusinessSchedulePage() {
             {activeTab === 'timeoff' && (
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <TimeOffSection
-                        initialValues={timeOffRes?.data || []}
-                        onAdd={handleAddTimeOff}
-                        onRemove={handleRemoveTimeOff}
-                        onUpdate={handleUpdateTimeOff}
+                        entries={timeOffRes?.data || []}
+                        opened={opened}
+                        editingEntry={editingEntry}
+                        onOpenAdd={handleOpenAdd}
+                        onEdit={handleEdit}
+                        onClose={close}
+                        onSubmit={handleModalSubmit}
+                        onDelete={handleDelete}
                     />
                 </div>
             )}

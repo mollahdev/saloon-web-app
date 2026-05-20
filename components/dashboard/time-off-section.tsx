@@ -1,11 +1,7 @@
 'use client';
 import { Button, Stack, Text, Badge, ActionIcon, Tooltip } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
 import { HiOutlineTrash, HiOutlinePlus, HiOutlineCalendar, HiOutlinePencil } from 'react-icons/hi';
 import { TbRepeat, TbCoffee, TbCalendarEvent } from 'react-icons/tb';
-import { useConfirmation } from '@/hooks/use-confirmation';
 import { DAY_OF_WEEK_OPTIONS } from '@/constants';
 import dayjs from 'dayjs';
 import TimeOffModal from './time-off-modal';
@@ -24,10 +20,14 @@ export interface TimeOffData {
 }
 
 interface TimeOffSectionProps {
-    initialValues?: TimeOffData[];
-    onAdd?: (entry: TimeOffData) => void;
-    onRemove?: (id: string) => void;
-    onUpdate?: (id: string, entry: TimeOffData) => void;
+    entries: TimeOffData[];
+    opened: boolean;
+    editingEntry: TimeOffData | null;
+    onOpenAdd: () => void;
+    onEdit: (entry: TimeOffData) => void;
+    onClose: () => void;
+    onSubmit: (entry: TimeOffData) => void;
+    onDelete: (entry: TimeOffData) => void;
 }
 
 const typeConfig: Record<
@@ -104,56 +104,15 @@ function getOrdinalSuffix(n: number): string {
 }
 
 export default function TimeOffSection({
-    initialValues,
-    onAdd,
-    onRemove,
-    onUpdate,
+    entries,
+    opened,
+    editingEntry,
+    onOpenAdd,
+    onEdit,
+    onClose,
+    onSubmit,
+    onDelete,
 }: TimeOffSectionProps) {
-    const [opened, { open, close }] = useDisclosure(false);
-    const { confirm } = useConfirmation();
-    const [editingEntry, setEditingEntry] = useState<TimeOffData | null>(null);
-
-    const [timeOffs, setTimeOffs] = useState<TimeOffData[]>(initialValues || []);
-
-    const handleOpenAdd = () => {
-        setEditingEntry(null);
-        open();
-    };
-
-    const handleEdit = (entry: TimeOffData) => {
-        setEditingEntry(entry);
-        open();
-    };
-
-    const handleModalSubmit = (entry: TimeOffData) => {
-        if (editingEntry?.id) {
-            setTimeOffs(timeOffs.map((t) => (t.id === editingEntry.id ? entry : t)));
-            onUpdate?.(editingEntry.id, entry);
-            toast.success('Time off updated successfully');
-        } else {
-            setTimeOffs([...timeOffs, entry]);
-            onAdd?.(entry);
-            toast.success('Time off added successfully');
-        }
-        setEditingEntry(null);
-    };
-
-    const handleDelete = (entry: TimeOffData) => {
-        confirm({
-            title: 'Delete Time Off',
-            message: `Are you sure you want to delete "${entry.title}"? This action cannot be undone.`,
-            confirmLabel: 'Delete',
-            color: 'red',
-            onConfirm: () => {
-                setTimeOffs(timeOffs.filter((t) => t.id !== entry.id));
-                if (entry.id) {
-                    onRemove?.(entry.id);
-                }
-                toast.success('Time off deleted successfully');
-            },
-        });
-    };
-
     return (
         <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100">
             {/* Section header */}
@@ -169,7 +128,7 @@ export default function TimeOffSection({
                     color="teal"
                     size="xs"
                     leftSection={<HiOutlinePlus size={14} />}
-                    onClick={handleOpenAdd}
+                    onClick={onOpenAdd}
                     className="font-semibold"
                 >
                     Add
@@ -177,7 +136,7 @@ export default function TimeOffSection({
             </div>
 
             {/* Time off list */}
-            {timeOffs.length === 0 ? (
+            {entries.length === 0 ? (
                 <div className="py-8 text-center">
                     <HiOutlineCalendar size={32} className="mx-auto text-gray-300 mb-2" />
                     <Text size="sm" c="dimmed">
@@ -186,7 +145,7 @@ export default function TimeOffSection({
                 </div>
             ) : (
                 <Stack gap="xs">
-                    {timeOffs.map((entry) => (
+                    {entries.map((entry) => (
                         <div
                             key={entry.id}
                             className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
@@ -231,7 +190,7 @@ export default function TimeOffSection({
                                         color="gray"
                                         size="md"
                                         radius="md"
-                                        onClick={() => handleEdit(entry)}
+                                        onClick={() => onEdit(entry)}
                                     >
                                         <HiOutlinePencil size={15} />
                                     </ActionIcon>
@@ -242,7 +201,7 @@ export default function TimeOffSection({
                                         color="red"
                                         size="md"
                                         radius="md"
-                                        onClick={() => handleDelete(entry)}
+                                        onClick={() => onDelete(entry)}
                                     >
                                         <HiOutlineTrash size={15} />
                                     </ActionIcon>
@@ -256,8 +215,8 @@ export default function TimeOffSection({
             {/* Time Off Modal */}
             <TimeOffModal
                 opened={opened}
-                onClose={close}
-                onSubmit={handleModalSubmit}
+                onClose={onClose}
+                onSubmit={onSubmit}
                 editingEntry={editingEntry}
             />
         </div>

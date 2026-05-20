@@ -34,6 +34,17 @@ export const timeOffApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags: (_result, _err, { staffId }) => [{ type: 'TimeOff', id: staffId }],
         }),
+        updateTimeOff: builder.mutation<
+            { message: string; data: TimeOffEntry },
+            { staffId: string; timeOffId: string; body: TimeOffFormValues }
+        >({
+            query: ({ staffId, timeOffId, body }) => ({
+                url: `/api/private/staffs/${staffId}/time-off/${timeOffId}`,
+                method: 'PUT',
+                body,
+            }),
+            invalidatesTags: (_result, _err, { staffId }) => [{ type: 'TimeOff', id: staffId }],
+        }),
         deleteTimeOff: builder.mutation<
             { message: string; data: null },
             { staffId: string; timeOffId: string }
@@ -47,5 +58,9 @@ export const timeOffApi = apiSlice.injectEndpoints({
     }),
 });
 
-export const { useGetTimeOffsQuery, useCreateTimeOffMutation, useDeleteTimeOffMutation } =
-    timeOffApi;
+export const {
+    useGetTimeOffsQuery,
+    useCreateTimeOffMutation,
+    useUpdateTimeOffMutation,
+    useDeleteTimeOffMutation,
+} = timeOffApi;
