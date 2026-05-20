@@ -44,6 +44,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             endTime: val.data.endTime || null,
             repeatType: (val.data.repeatType as any) || null,
             repeatDay: val.data.repeatDay ?? null,
+            repeatMonth: val.data.repeatMonth ?? null,
         };
 
         const updated = await prisma.businessTimeOff.update({

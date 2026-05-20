@@ -98,9 +98,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
                 endDate: data.endDate ? new Date(data.endDate) : null,
                 startTime: data.startTime || null,
                 endTime: data.endTime || null,
-                repeatType: data.repeatType || null,
+                repeatType: data.repeatType as any,
                 repeatDay: data.repeatDay ?? null,
-            },
+                repeatMonth: data.repeatMonth ?? null,
+            } as any,
         });
 
         return NextResponse.json(

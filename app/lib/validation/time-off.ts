@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const timeOffTypeEnum = z.enum(['SINGLE', 'RECURRING']);
-export const repeatTypeEnum = z.enum(['DAILY', 'WEEKLY', 'MONTHLY']);
+export const repeatTypeEnum = z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']);
 
 export const timeOffSchema = z
     .object({
@@ -13,7 +13,8 @@ export const timeOffSchema = z
         startTime: z.string().nullable().optional(),
         endTime: z.string().nullable().optional(),
         repeatType: repeatTypeEnum.nullable().optional(),
-        repeatDay: z.number().int().nullable().optional(),
+        repeatDay: z.number().int().min(-1).nullable().optional(),
+        repeatMonth: z.number().int().min(1).max(12).nullable().optional(),
     })
     .refine(
         (data) => {

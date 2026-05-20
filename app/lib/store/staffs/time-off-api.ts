@@ -11,8 +11,9 @@ export interface TimeOffEntry {
     endDate: string | null;
     startTime: string | null;
     endTime: string | null;
-    repeatType: 'DAILY' | 'WEEKLY' | 'MONTHLY' | null;
+    repeatType: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | null;
     repeatDay: number | null;
+    repeatMonth: number | null;
     createdAt: string;
     updatedAt: string;
 }

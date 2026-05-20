@@ -62,6 +62,7 @@ export async function POST(request: Request) {
             endTime: val.data.endTime || null,
             repeatType: (val.data.repeatType as any) || null,
             repeatDay: val.data.repeatDay ?? null,
+            repeatMonth: val.data.repeatMonth ?? null,
         };
 
         const timeOff = await prisma.businessTimeOff.create({ data });

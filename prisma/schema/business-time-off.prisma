@@ -9,6 +9,7 @@ model BusinessTimeOff {
   endTime       String?         @map("end_time")
   repeatType    RepeatType?     @map("repeat_type")
   repeatDay     Int?            @map("repeat_day")
+  repeatMonth   Int?            @map("repeat_month")
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
 

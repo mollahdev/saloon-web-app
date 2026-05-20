@@ -17,6 +17,7 @@ export interface TimeOffData {
     endTime?: string | null;
     repeatType?: string | null;
     repeatDay?: number | null;
+    repeatMonth?: number | null;
 }
 
 interface TimeOffSectionProps {
@@ -68,16 +69,38 @@ function formatTimeOffDisplay(entry: TimeOffData): string {
     }
 
     if (entry.type === 'RECURRING' && entry.repeatType) {
-        const repeatLabel =
+        let repeatLabel: string;
+        if (entry.repeatType === 'DAILY') {
+            repeatLabel = 'Every day';
+        } else if (
             entry.repeatType === 'WEEKLY' &&
             entry.repeatDay !== null &&
             entry.repeatDay !== undefined
-                ? `Every ${DAY_OF_WEEK_OPTIONS.find((d) => d.value === String(entry.repeatDay))?.label || ''}`
-                : entry.repeatType === 'MONTHLY' &&
-                    entry.repeatDay !== null &&
-                    entry.repeatDay !== undefined
-                  ? `Monthly on the ${entry.repeatDay}${getOrdinalSuffix(entry.repeatDay)}`
-                  : `Repeats ${entry.repeatType.toLowerCase()}`;
+        ) {
+            repeatLabel = `Every ${DAY_OF_WEEK_OPTIONS.find((d) => d.value === String(entry.repeatDay))?.label || ''}`;
+        } else if (
+            entry.repeatType === 'MONTHLY' &&
+            entry.repeatDay !== null &&
+            entry.repeatDay !== undefined
+        ) {
+            repeatLabel =
+                entry.repeatDay === -1
+                    ? 'Monthly on the last day'
+                    : `Monthly on the ${entry.repeatDay}${getOrdinalSuffix(entry.repeatDay)}`;
+        } else if (
+            entry.repeatType === 'YEARLY' &&
+            entry.repeatMonth !== null &&
+            entry.repeatMonth !== undefined &&
+            entry.repeatDay !== null &&
+            entry.repeatDay !== undefined
+        ) {
+            const monthName = dayjs()
+                .month(entry.repeatMonth - 1)
+                .format('MMMM');
+            repeatLabel = `Every ${monthName} ${entry.repeatDay}${getOrdinalSuffix(entry.repeatDay)}`;
+        } else {
+            repeatLabel = `Repeats ${entry.repeatType.toLowerCase()}`;
+        }
         parts.push(repeatLabel);
     }
 
