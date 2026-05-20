@@ -39,3 +39,15 @@ export const STATUS = {
     PENDING_VERIFICATION: 'PENDING_VERIFICATION',
     LOCKED: 'LOCKED',
 } as const;
+
+export const REPEAT_OPTIONS = [
+    { value: 'DAILY', label: 'Daily' },
+    { value: 'WEEKLY', label: 'Weekly' },
+    { value: 'MONTHLY', label: 'Monthly' },
+    { value: 'YEARLY', label: 'Yearly' },
+];
+
+export const DAY_OF_WEEK_OPTIONS = workingDayOptions.map((day) => ({
+    value: day,
+    label: day.charAt(0) + day.slice(1).toLowerCase(),
+}));

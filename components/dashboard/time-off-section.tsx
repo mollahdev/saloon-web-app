@@ -1,29 +1,14 @@
 'use client';
-import {
-    Button,
-    Modal,
-    TextInput,
-    Switch,
-    Select,
-    SegmentedControl,
-    Stack,
-    Text,
-    Badge,
-    ActionIcon,
-    Tooltip,
-    Group,
-    Divider,
-} from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
+import { Button, Stack, Text, Badge, ActionIcon, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { schemaResolver, useForm } from '@mantine/form';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { HiOutlineTrash, HiOutlinePlus, HiOutlineCalendar, HiOutlinePencil } from 'react-icons/hi';
 import { TbRepeat, TbCoffee, TbCalendarEvent } from 'react-icons/tb';
-import { TimeOffFormValues, timeOffSchema } from '@/app/lib/validation/time-off';
 import { useConfirmation } from '@/hooks/use-confirmation';
+import { DAY_OF_WEEK_OPTIONS } from '@/constants';
 import dayjs from 'dayjs';
+import TimeOffModal from './time-off-modal';
 
 export interface TimeOffData {
     id?: string;
@@ -69,22 +54,6 @@ const typeConfig: Record<
     },
 };
 
-const repeatOptions = [
-    { value: 'DAILY', label: 'Daily' },
-    { value: 'WEEKLY', label: 'Weekly' },
-    { value: 'MONTHLY', label: 'Monthly' },
-];
-
-const dayOfWeekOptions = [
-    { value: '0', label: 'Sunday' },
-    { value: '1', label: 'Monday' },
-    { value: '2', label: 'Tuesday' },
-    { value: '3', label: 'Wednesday' },
-    { value: '4', label: 'Thursday' },
-    { value: '5', label: 'Friday' },
-    { value: '6', label: 'Saturday' },
-];
-
 function formatTimeOffDisplay(entry: TimeOffData): string {
     const parts: string[] = [];
 
@@ -108,7 +77,7 @@ function formatTimeOffDisplay(entry: TimeOffData): string {
             entry.repeatType === 'WEEKLY' &&
             entry.repeatDay !== null &&
             entry.repeatDay !== undefined
-                ? `Every ${dayOfWeekOptions[entry.repeatDay]?.label || ''}`
+                ? `Every ${DAY_OF_WEEK_OPTIONS.find((d) => d.value === String(entry.repeatDay))?.label || ''}`
                 : entry.repeatType === 'MONTHLY' &&
                     entry.repeatDay !== null &&
                     entry.repeatDay !== undefined
@@ -142,90 +111,31 @@ export default function TimeOffSection({
 }: TimeOffSectionProps) {
     const [opened, { open, close }] = useDisclosure(false);
     const { confirm } = useConfirmation();
-    const [selectedType, setSelectedType] = useState<'SINGLE' | 'BREAK' | 'RECURRING'>('SINGLE');
-    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editingEntry, setEditingEntry] = useState<TimeOffData | null>(null);
 
     const [timeOffs, setTimeOffs] = useState<TimeOffData[]>(initialValues || []);
 
-    const form = useForm<TimeOffFormValues>({
-        initialValues: {
-            type: 'SINGLE',
-            title: '',
-            isFullDay: true,
-            startDate: '',
-            endDate: null,
-            startTime: null,
-            endTime: null,
-            repeatType: null,
-            repeatDay: null,
-        },
-        validate: schemaResolver(timeOffSchema),
-    });
-
-    const resetAndOpen = () => {
-        setEditingId(null);
-        form.reset();
-        setSelectedType('SINGLE');
-        form.setFieldValue('type', 'SINGLE');
+    const handleOpenAdd = () => {
+        setEditingEntry(null);
         open();
     };
 
     const handleEdit = (entry: TimeOffData) => {
-        setEditingId(entry.id || null);
-        setSelectedType((entry.type as 'SINGLE' | 'BREAK' | 'RECURRING') || 'SINGLE');
-        form.setValues({
-            type: (entry.type as any) || 'SINGLE',
-            title: entry.title || '',
-            isFullDay: entry.isFullDay ?? true,
-            startDate: entry.startDate || '',
-            endDate: entry.endDate || null,
-            startTime: entry.startTime || null,
-            endTime: entry.endTime || null,
-            repeatType: (entry.repeatType as any) || null,
-            repeatDay: entry.repeatDay || null,
-        });
+        setEditingEntry(entry);
         open();
     };
 
-    const handleTypeChange = (value: string) => {
-        const type = value as 'SINGLE' | 'BREAK' | 'RECURRING';
-        setSelectedType(type);
-        form.setFieldValue('type', type);
-
-        // Adjust defaults based on type
-        if (type === 'BREAK') {
-            form.setFieldValue('isFullDay', false);
-            form.setFieldValue('endDate', null);
-        } else if (type === 'RECURRING') {
-            form.setFieldValue('endDate', null);
-        } else {
-            form.setFieldValue('isFullDay', true);
-            form.setFieldValue('repeatType', null);
-            form.setFieldValue('repeatDay', null);
-        }
-    };
-
-    const handleSubmit = (values: TimeOffFormValues) => {
-        if (editingId) {
-            const updatedEntry: TimeOffData = {
-                ...values,
-                id: editingId,
-            };
-            setTimeOffs(timeOffs.map((t) => (t.id === editingId ? updatedEntry : t)));
-            onUpdate?.(editingId, updatedEntry);
+    const handleModalSubmit = (entry: TimeOffData) => {
+        if (editingEntry?.id) {
+            setTimeOffs(timeOffs.map((t) => (t.id === editingEntry.id ? entry : t)));
+            onUpdate?.(editingEntry.id, entry);
             toast.success('Time off updated successfully');
         } else {
-            const newEntry: TimeOffData = {
-                ...values,
-                id: crypto.randomUUID(), // Temporary ID for local state
-            };
-            setTimeOffs([...timeOffs, newEntry]);
-            onAdd?.(newEntry);
+            setTimeOffs([...timeOffs, entry]);
+            onAdd?.(entry);
             toast.success('Time off added successfully');
         }
-        close();
-        form.reset();
-        setEditingId(null);
+        setEditingEntry(null);
     };
 
     const handleDelete = (entry: TimeOffData) => {
@@ -259,7 +169,7 @@ export default function TimeOffSection({
                     color="teal"
                     size="xs"
                     leftSection={<HiOutlinePlus size={14} />}
-                    onClick={resetAndOpen}
+                    onClick={handleOpenAdd}
                     className="font-semibold"
                 >
                     Add
@@ -279,7 +189,7 @@ export default function TimeOffSection({
                     {timeOffs.map((entry) => (
                         <div
                             key={entry.id}
-                            className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors group"
+                            className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
                         >
                             <div className="flex items-start gap-3 min-w-0 flex-1">
                                 <div
@@ -314,25 +224,27 @@ export default function TimeOffSection({
                                     </Text>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-1">
                                 <Tooltip label="Edit" withArrow>
                                     <ActionIcon
-                                        variant="subtle"
-                                        color="blue"
-                                        size="sm"
+                                        variant="light"
+                                        color="gray"
+                                        size="md"
+                                        radius="md"
                                         onClick={() => handleEdit(entry)}
                                     >
-                                        <HiOutlinePencil size={14} />
+                                        <HiOutlinePencil size={15} />
                                     </ActionIcon>
                                 </Tooltip>
                                 <Tooltip label="Delete" withArrow>
                                     <ActionIcon
-                                        variant="subtle"
+                                        variant="light"
                                         color="red"
-                                        size="sm"
+                                        size="md"
+                                        radius="md"
                                         onClick={() => handleDelete(entry)}
                                     >
-                                        <HiOutlineTrash size={14} />
+                                        <HiOutlineTrash size={15} />
                                     </ActionIcon>
                                 </Tooltip>
                             </div>
@@ -341,309 +253,13 @@ export default function TimeOffSection({
                 </Stack>
             )}
 
-            {/* Add Time Off Modal */}
-            <Modal
+            {/* Time Off Modal */}
+            <TimeOffModal
                 opened={opened}
                 onClose={close}
-                title={
-                    <Text fw={700} size="lg">
-                        {editingId ? 'Edit Time Off' : 'Add Time Off'}
-                    </Text>
-                }
-                size="md"
-                radius="lg"
-                centered
-            >
-                <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
-                    <Stack gap="md">
-                        {/* Type selector */}
-                        <div>
-                            <Text size="xs" fw={700} className="uppercase text-gray-400 mb-2">
-                                Type
-                            </Text>
-                            <SegmentedControl
-                                fullWidth
-                                value={selectedType}
-                                onChange={handleTypeChange}
-                                data={[
-                                    {
-                                        value: 'SINGLE',
-                                        label: (
-                                            <div className="flex items-center gap-1.5 justify-center py-0.5">
-                                                <TbCalendarEvent size={15} />
-                                                <span className="text-xs font-semibold">
-                                                    One-time
-                                                </span>
-                                            </div>
-                                        ),
-                                    },
-                                    {
-                                        value: 'BREAK',
-                                        label: (
-                                            <div className="flex items-center gap-1.5 justify-center py-0.5">
-                                                <TbCoffee size={15} />
-                                                <span className="text-xs font-semibold">Break</span>
-                                            </div>
-                                        ),
-                                    },
-                                    {
-                                        value: 'RECURRING',
-                                        label: (
-                                            <div className="flex items-center gap-1.5 justify-center py-0.5">
-                                                <TbRepeat size={15} />
-                                                <span className="text-xs font-semibold">
-                                                    Recurring
-                                                </span>
-                                            </div>
-                                        ),
-                                    },
-                                ]}
-                                styles={{
-                                    root: { backgroundColor: 'var(--mantine-color-gray-0)' },
-                                }}
-                            />
-                            <Text size="xs" c="dimmed" className="mt-1.5">
-                                {typeConfig[selectedType].description}
-                            </Text>
-                        </div>
-
-                        <Divider />
-
-                        {/* Title */}
-                        <TextInput
-                            label="Title"
-                            placeholder="e.g., Vacation, Lunch break, Doctor visit"
-                            {...form.getInputProps('title')}
-                            styles={{
-                                label: {
-                                    fontSize: 11,
-                                    fontWeight: 700,
-                                    textTransform: 'uppercase',
-                                    color: 'var(--mantine-color-gray-5)',
-                                    marginBottom: 4,
-                                },
-                            }}
-                        />
-
-                        {/* Full day toggle — hidden for BREAK type */}
-                        {selectedType !== 'BREAK' && (
-                            <Switch
-                                label="Full day"
-                                checked={form.values.isFullDay}
-                                onChange={(event) =>
-                                    form.setFieldValue('isFullDay', event.currentTarget.checked)
-                                }
-                                color="teal"
-                                styles={{
-                                    track: { cursor: 'pointer' },
-                                    label: {
-                                        fontWeight: 600,
-                                        cursor: 'pointer',
-                                    },
-                                }}
-                            />
-                        )}
-
-                        {/* Date selection */}
-                        <Group grow>
-                            <DatePickerInput
-                                label="Start Date"
-                                placeholder="Pick date"
-                                value={
-                                    form.values.startDate ? new Date(form.values.startDate) : null
-                                }
-                                onChange={(date) =>
-                                    form.setFieldValue(
-                                        'startDate',
-                                        date ? dayjs(date).format('YYYY-MM-DD') : ''
-                                    )
-                                }
-                                error={form.errors.startDate}
-                                minDate={new Date()}
-                                styles={{
-                                    label: {
-                                        fontSize: 11,
-                                        fontWeight: 700,
-                                        textTransform: 'uppercase',
-                                        color: 'var(--mantine-color-gray-5)',
-                                        marginBottom: 4,
-                                    },
-                                }}
-                            />
-
-                            {/* End date — only for SINGLE type with multi-day support */}
-                            {selectedType === 'SINGLE' && (
-                                <DatePickerInput
-                                    label="End Date"
-                                    placeholder="Optional"
-                                    value={
-                                        form.values.endDate ? new Date(form.values.endDate) : null
-                                    }
-                                    onChange={(date) =>
-                                        form.setFieldValue(
-                                            'endDate',
-                                            date ? dayjs(date).format('YYYY-MM-DD') : null
-                                        )
-                                    }
-                                    error={form.errors.endDate}
-                                    minDate={
-                                        form.values.startDate
-                                            ? new Date(form.values.startDate)
-                                            : new Date()
-                                    }
-                                    clearable
-                                    styles={{
-                                        label: {
-                                            fontSize: 11,
-                                            fontWeight: 700,
-                                            textTransform: 'uppercase',
-                                            color: 'var(--mantine-color-gray-5)',
-                                            marginBottom: 4,
-                                        },
-                                    }}
-                                />
-                            )}
-                        </Group>
-
-                        {/* Time range — shown when not full day or BREAK type */}
-                        {(!form.values.isFullDay || selectedType === 'BREAK') && (
-                            <Group grow>
-                                <TextInput
-                                    type="time"
-                                    label="Start Time"
-                                    className="time-picker-no-icon"
-                                    onClick={(event) => event.currentTarget.showPicker()}
-                                    {...form.getInputProps('startTime')}
-                                    styles={{
-                                        input: { cursor: 'pointer' },
-                                        label: {
-                                            fontSize: 11,
-                                            fontWeight: 700,
-                                            textTransform: 'uppercase',
-                                            color: 'var(--mantine-color-gray-5)',
-                                            marginBottom: 4,
-                                        },
-                                    }}
-                                />
-                                <TextInput
-                                    type="time"
-                                    label="End Time"
-                                    className="time-picker-no-icon"
-                                    onClick={(event) => event.currentTarget.showPicker()}
-                                    {...form.getInputProps('endTime')}
-                                    styles={{
-                                        input: { cursor: 'pointer' },
-                                        label: {
-                                            fontSize: 11,
-                                            fontWeight: 700,
-                                            textTransform: 'uppercase',
-                                            color: 'var(--mantine-color-gray-5)',
-                                            marginBottom: 4,
-                                        },
-                                    }}
-                                />
-                            </Group>
-                        )}
-
-                        {/* Recurring options */}
-                        {selectedType === 'RECURRING' && (
-                            <>
-                                <Select
-                                    label="Repeat Every"
-                                    placeholder="Select frequency"
-                                    data={repeatOptions}
-                                    value={form.values.repeatType || ''}
-                                    onChange={(value) => {
-                                        form.setFieldValue('repeatType', value as any);
-                                        form.setFieldValue('repeatDay', null);
-                                    }}
-                                    error={form.errors.repeatType}
-                                    styles={{
-                                        label: {
-                                            fontSize: 11,
-                                            fontWeight: 700,
-                                            textTransform: 'uppercase',
-                                            color: 'var(--mantine-color-gray-5)',
-                                            marginBottom: 4,
-                                        },
-                                    }}
-                                />
-
-                                {form.values.repeatType === 'WEEKLY' && (
-                                    <Select
-                                        label="Day of Week"
-                                        placeholder="Select day"
-                                        data={dayOfWeekOptions}
-                                        value={
-                                            form.values.repeatDay !== null
-                                                ? String(form.values.repeatDay)
-                                                : ''
-                                        }
-                                        onChange={(value) =>
-                                            form.setFieldValue(
-                                                'repeatDay',
-                                                value !== null ? parseInt(value) : null
-                                            )
-                                        }
-                                        styles={{
-                                            label: {
-                                                fontSize: 11,
-                                                fontWeight: 700,
-                                                textTransform: 'uppercase',
-                                                color: 'var(--mantine-color-gray-5)',
-                                                marginBottom: 4,
-                                            },
-                                        }}
-                                    />
-                                )}
-
-                                {form.values.repeatType === 'MONTHLY' && (
-                                    <Select
-                                        label="Day of Month"
-                                        placeholder="Select day"
-                                        data={Array.from({ length: 31 }, (_, i) => ({
-                                            value: String(i + 1),
-                                            label: `${i + 1}${getOrdinalSuffix(i + 1)}`,
-                                        }))}
-                                        value={
-                                            form.values.repeatDay !== null
-                                                ? String(form.values.repeatDay)
-                                                : ''
-                                        }
-                                        onChange={(value) =>
-                                            form.setFieldValue(
-                                                'repeatDay',
-                                                value !== null ? parseInt(value) : null
-                                            )
-                                        }
-                                        styles={{
-                                            label: {
-                                                fontSize: 11,
-                                                fontWeight: 700,
-                                                textTransform: 'uppercase',
-                                                color: 'var(--mantine-color-gray-5)',
-                                                marginBottom: 4,
-                                            },
-                                        }}
-                                    />
-                                )}
-                            </>
-                        )}
-
-                        <Divider />
-
-                        {/* Submit */}
-                        <Group justify="flex-end">
-                            <Button variant="default" onClick={close}>
-                                Cancel
-                            </Button>
-                            <Button type="submit">
-                                {editingId ? 'Update Time Off' : 'Add Time Off'}
-                            </Button>
-                        </Group>
-                    </Stack>
-                </form>
-            </Modal>
+                onSubmit={handleModalSubmit}
+                editingEntry={editingEntry}
+            />
         </div>
     );
 }
