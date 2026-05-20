@@ -34,7 +34,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ message: 'Time off not found' }, { status: 404 });
         }
 
-        const data = {
+        const data: Record<string, any> = {
             type: val.data.type as any,
             title: val.data.title || 'Time Off',
             isFullDay: val.data.isFullDay ?? true,
@@ -44,12 +44,15 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             endTime: val.data.endTime || null,
             repeatType: (val.data.repeatType as any) || null,
             repeatDay: val.data.repeatDay ?? null,
-            repeatMonth: val.data.repeatMonth ?? null,
         };
+
+        if (val.data.repeatMonth != null) {
+            data.repeatMonth = val.data.repeatMonth;
+        }
 
         const updated = await prisma.businessTimeOff.update({
             where: { id: timeOffId },
-            data,
+            data: data as any,
         });
 
         return NextResponse.json({

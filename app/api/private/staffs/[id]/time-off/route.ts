@@ -88,20 +88,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
         const data = val.data;
 
+        const createData: Record<string, any> = {
+            userId: staffId,
+            type: data.type,
+            title: data.title,
+            isFullDay: data.isFullDay,
+            startDate: new Date(data.startDate),
+            endDate: data.endDate ? new Date(data.endDate) : null,
+            startTime: data.startTime || null,
+            endTime: data.endTime || null,
+            repeatType: data.repeatType || null,
+            repeatDay: data.repeatDay ?? null,
+        };
+
+        if (data.repeatMonth != null) {
+            createData.repeatMonth = data.repeatMonth;
+        }
+
         const timeOff = await prisma.staffTimeOff.create({
-            data: {
-                userId: staffId,
-                type: data.type,
-                title: data.title,
-                isFullDay: data.isFullDay,
-                startDate: new Date(data.startDate),
-                endDate: data.endDate ? new Date(data.endDate) : null,
-                startTime: data.startTime || null,
-                endTime: data.endTime || null,
-                repeatType: data.repeatType as any,
-                repeatDay: data.repeatDay ?? null,
-                repeatMonth: data.repeatMonth ?? null,
-            } as any,
+            data: createData as any,
         });
 
         return NextResponse.json(

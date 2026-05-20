@@ -52,7 +52,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const data = {
+        const data: Record<string, any> = {
             type: val.data.type as any,
             title: val.data.title || 'Time Off',
             isFullDay: val.data.isFullDay ?? true,
@@ -62,10 +62,13 @@ export async function POST(request: Request) {
             endTime: val.data.endTime || null,
             repeatType: (val.data.repeatType as any) || null,
             repeatDay: val.data.repeatDay ?? null,
-            repeatMonth: val.data.repeatMonth ?? null,
         };
 
-        const timeOff = await prisma.businessTimeOff.create({ data });
+        if (val.data.repeatMonth != null) {
+            data.repeatMonth = val.data.repeatMonth;
+        }
+
+        const timeOff = await prisma.businessTimeOff.create({ data: data as any });
 
         return NextResponse.json({
             message: 'Time off added successfully',
