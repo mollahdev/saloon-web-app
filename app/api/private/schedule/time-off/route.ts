@@ -11,7 +11,7 @@ export async function GET(request: Request) {
             select: { status: true, role: true },
         });
 
-        if (!user || !isAdminOrOwner(user) || !isActiveStatus(user)) {
+        if (!user || !isActiveStatus(user)) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 

@@ -1,173 +1,194 @@
 'use client';
-import { Button, Divider, Switch, Stack, Text } from '@mantine/core';
-import ScheduleTimePicker from '@/components/dashboard/schedule-time-picker';
-import { useEffect } from 'react';
-import { schemaResolver, useForm } from '@mantine/form';
-import toast from 'react-hot-toast';
 import { PageTitle } from '@/utils/portal';
+import { useGetScheduleQuery, useGetBusinessTimeOffQuery } from '@/app/lib/store/schedule/api';
+import { useGetStaffScheduleQuery, useGetStaffTimeOffQuery } from '@/app/lib/store/staffs/api';
+import { useGetProfileQuery } from '@/app/lib/store/profile/api';
+import { Badge, Text, Divider, Stack, Card, Grid, Group } from '@mantine/core';
 import WorkingHoursLoading from './loading';
-import { scheduleSchema, ScheduleValues } from '@/app/lib/validation/schedule';
-import { useGetScheduleQuery, useUpdateScheduleMutation } from '@/app/lib/store/schedule/api';
-import { defaultSchedule } from '@/constants';
+import dayjs from 'dayjs';
 
 const formatDayName = (day: string) => {
     return day.charAt(0) + day.slice(1).toLowerCase();
 };
 
+const formatTime = (timeStr: string) => {
+    if (!timeStr) return '';
+    const [hours, minutes] = timeStr.split(':');
+    const date = new Date();
+    date.setHours(parseInt(hours, 10));
+    date.setMinutes(parseInt(minutes, 10));
+    return dayjs(date).format('h:mm A');
+};
+
+const ScheduleList = ({ schedule, title }: { schedule: any[]; title: string }) => (
+    <Card withBorder radius="md" p="md" className="bg-white">
+        <Text fw={700} size="lg" mb="md">
+            {title}
+        </Text>
+        <Stack gap={0}>
+            {schedule.map((item: any, index: number) => (
+                <div key={item.dayOfWeek}>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between py-3 gap-2">
+                        <Text fw={600} size="md" className="w-full sm:w-32">
+                            {formatDayName(item.dayOfWeek)}
+                        </Text>
+
+                        {item.isOffDay ? (
+                            <Badge color="red" variant="light">
+                                Closed
+                            </Badge>
+                        ) : (
+                            <Group gap="xs">
+                                <Badge color="teal" variant="light">
+                                    Open
+                                </Badge>
+                                <Text size="sm" fw={500} c="dimmed">
+                                    {formatTime(item.startTime)} - {formatTime(item.endTime)}
+                                </Text>
+                            </Group>
+                        )}
+                    </div>
+                    {index < schedule.length - 1 && <Divider variant="dashed" color="gray.2" />}
+                </div>
+            ))}
+        </Stack>
+    </Card>
+);
+
 export default function WorkingHoursPage() {
-    const { data: response, isLoading, error } = useGetScheduleQuery();
-    const [updateSchedule, { isLoading: isUpdating }] = useUpdateScheduleMutation();
+    const { data: profileRes, isLoading: isLoadingProfile } = useGetProfileQuery();
+    const profile = profileRes?.data;
 
-    const form = useForm<ScheduleValues>({
-        initialValues: {
-            schedule: defaultSchedule.map((wh) => ({
-                ...wh,
-                startTime: wh.startTime.substring(0, 5),
-                endTime: wh.endTime.substring(0, 5),
-            })),
-        },
-        validate: schemaResolver(scheduleSchema),
-    });
+    const { data: businessScheduleRes, isLoading: isLoadingBusiness } = useGetScheduleQuery();
 
-    useEffect(() => {
-        if (response?.data?.schedule) {
-            form.setValues({
-                schedule: response.data.schedule.map((wh: any) => ({
-                    ...wh,
-                    startTime: wh.startTime.substring(0, 5),
-                    endTime: wh.endTime.substring(0, 5),
-                })),
-            });
-        }
-    }, [response, form]);
+    const { data: staffScheduleRes, isLoading: isLoadingStaffSchedule } = useGetStaffScheduleQuery(
+        profile?.id as string,
+        { skip: !profile?.id }
+    );
 
-    if (isLoading || error) {
-        return <WorkingHoursLoading />;
+    const { data: staffTimeOffRes, isLoading: isLoadingTimeOff } = useGetStaffTimeOffQuery(
+        profile?.id as string,
+        { skip: !profile?.id }
+    );
+
+    const { data: businessTimeOffRes, isLoading: isLoadingBusinessTimeOff } =
+        useGetBusinessTimeOffQuery();
+
+    if (
+        isLoadingProfile ||
+        isLoadingBusiness ||
+        isLoadingStaffSchedule ||
+        isLoadingTimeOff ||
+        isLoadingBusinessTimeOff
+    ) {
+        return (
+            <>
+                <PageTitle.Source>Working Hours</PageTitle.Source>
+                <WorkingHoursLoading />
+            </>
+        );
     }
 
-    const handleSubmit = async (values: ScheduleValues) => {
-        try {
-            const res = await updateSchedule(values).unwrap();
-            toast.success(res.message || 'Working hours updated successfully');
-        } catch (err: any) {
-            toast.error(err?.data?.message || 'Failed to update working hours');
-        }
-    };
+    const businessSchedule = businessScheduleRes?.data?.schedule || [];
+    const staffSchedule = staffScheduleRes?.data?.workingHours || [];
+    const staffTimeOff = staffTimeOffRes?.data || [];
+    const businessTimeOff = businessTimeOffRes?.data || [];
 
     return (
         <>
             <PageTitle.Source>Working Hours</PageTitle.Source>
-            <div className="max-w-3xl mx-auto bg-white p-2 md:p-6 rounded-xl shadow-sm border border-gray-100">
-                <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
-                    <Stack gap={0}>
-                        {form.values.schedule.map((item, index) => (
-                            <div
-                                key={item.dayOfWeek}
-                                className="transition-colors hover:bg-gray-50/50"
-                            >
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 p-2 md:p-3">
-                                    <div className="flex flex-row-reverse sm:flex-row items-center justify-between sm:justify-start gap-6 sm:gap-12 flex-1">
-                                        <div className="sm:w-32 text-right sm:text-left">
-                                            <Text fw={700} size="md" className="tracking-tight">
-                                                {formatDayName(item.dayOfWeek)}
-                                            </Text>
+            <div className="max-w-6xl mx-auto w-full pb-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <Grid gap="xl">
+                    <Grid.Col span={{ base: 12, md: 6 }}>
+                        <ScheduleList schedule={staffSchedule} title="My Working Hours" />
+
+                        {staffTimeOff.length > 0 && (
+                            <Card withBorder radius="md" p="md" className="bg-white mt-6">
+                                <Text fw={700} size="lg" mb="md">
+                                    My Upcoming Time Off
+                                </Text>
+                                <Stack gap="sm">
+                                    {staffTimeOff.map((timeOff: any) => (
+                                        <div
+                                            key={timeOff.id}
+                                            className="p-3 bg-gray-50 rounded-md border border-gray-100 flex flex-col sm:flex-row justify-between sm:items-center gap-2"
+                                        >
+                                            <div>
+                                                <Text fw={600} size="sm">
+                                                    {timeOff.title}
+                                                </Text>
+                                                <Text size="xs" c="dimmed">
+                                                    {timeOff.type}
+                                                </Text>
+                                            </div>
+                                            <div className="text-left sm:text-right">
+                                                <Text size="sm" fw={500}>
+                                                    {dayjs(timeOff.startDate).format('MMM D, YYYY')}
+                                                    {timeOff.endDate &&
+                                                        timeOff.endDate !== timeOff.startDate &&
+                                                        ` - ${dayjs(timeOff.endDate).format('MMM D, YYYY')}`}
+                                                </Text>
+                                                {!timeOff.isFullDay &&
+                                                    timeOff.startTime &&
+                                                    timeOff.endTime && (
+                                                        <Text size="xs" c="dimmed">
+                                                            {formatTime(timeOff.startTime)} -{' '}
+                                                            {formatTime(timeOff.endTime)}
+                                                        </Text>
+                                                    )}
+                                            </div>
                                         </div>
-                                        <Switch
-                                            label={item.isOffDay ? 'Closed' : 'Open'}
-                                            checked={!item.isOffDay}
-                                            onChange={(event) =>
-                                                form.setFieldValue(
-                                                    `schedule.${index}.isOffDay`,
-                                                    !event.currentTarget.checked
-                                                )
-                                            }
-                                            color="teal"
-                                            size="md"
-                                            styles={{
-                                                track: { cursor: 'pointer' },
-                                                label: {
-                                                    fontWeight: 600,
-                                                    fontSize: '0.875rem',
-                                                    color: item.isOffDay
-                                                        ? 'var(--mantine-color-red-6)'
-                                                        : 'var(--mantine-color-teal-6)',
-                                                    cursor: 'pointer',
-                                                    width: 60,
-                                                },
-                                            }}
-                                        />
-                                    </div>
+                                    ))}
+                                </Stack>
+                            </Card>
+                        )}
+                    </Grid.Col>
 
-                                    <div className="flex gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
-                                        <ScheduleTimePicker
-                                            label="Opening"
-                                            size="sm"
-                                            disabled={item.isOffDay}
-                                            className="w-[48%] sm:w-36"
-                                            value={form.values.schedule[index].startTime ?? ''}
-                                            onChange={(value) =>
-                                                form.setFieldValue(
-                                                    `schedule.${index}.startTime`,
-                                                    value
-                                                )
-                                            }
-                                            error={form.errors[`schedule.${index}.startTime`]}
-                                            styles={{
-                                                label: {
-                                                    marginBottom: 4,
-                                                    fontSize: 11,
-                                                    fontWeight: 700,
-                                                    textTransform: 'uppercase',
-                                                    color: 'var(--mantine-color-gray-5)',
-                                                },
-                                            }}
-                                        />
-                                        <ScheduleTimePicker
-                                            label="Closing"
-                                            size="sm"
-                                            disabled={item.isOffDay}
-                                            className="w-[48%] sm:w-36"
-                                            value={form.values.schedule[index].endTime ?? ''}
-                                            onChange={(value) =>
-                                                form.setFieldValue(
-                                                    `schedule.${index}.endTime`,
-                                                    value
-                                                )
-                                            }
-                                            error={form.errors[`schedule.${index}.endTime`]}
-                                            styles={{
-                                                label: {
-                                                    marginBottom: 4,
-                                                    fontSize: 11,
-                                                    fontWeight: 700,
-                                                    textTransform: 'uppercase',
-                                                    color: 'var(--mantine-color-gray-5)',
-                                                },
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                                {index < form.values.schedule.length - 1 && (
-                                    <Divider variant="dashed" color="gray.2" />
-                                )}
-                            </div>
-                        ))}
-                    </Stack>
+                    <Grid.Col span={{ base: 12, md: 6 }}>
+                        <ScheduleList schedule={businessSchedule} title="Business Hours" />
 
-                    <Divider my="lg" color="gray.1" />
-
-                    <div className="flex justify-end pb-2">
-                        <Button
-                            type="submit"
-                            size="md"
-                            loading={isUpdating}
-                            loaderProps={{ type: 'dots' }}
-                            className="w-full sm:w-auto"
-                        >
-                            Update Schedule
-                        </Button>
-                    </div>
-                </form>
+                        {businessTimeOff.length > 0 && (
+                            <Card withBorder radius="md" p="md" className="bg-white mt-6">
+                                <Text fw={700} size="lg" mb="md">
+                                    Business Time Off
+                                </Text>
+                                <Stack gap="sm">
+                                    {businessTimeOff.map((timeOff: any) => (
+                                        <div
+                                            key={timeOff.id}
+                                            className="p-3 bg-gray-50 rounded-md border border-gray-100 flex flex-col sm:flex-row justify-between sm:items-center gap-2"
+                                        >
+                                            <div>
+                                                <Text fw={600} size="sm">
+                                                    {timeOff.title}
+                                                </Text>
+                                                <Text size="xs" c="dimmed">
+                                                    {timeOff.type}
+                                                </Text>
+                                            </div>
+                                            <div className="text-left sm:text-right">
+                                                <Text size="sm" fw={500}>
+                                                    {dayjs(timeOff.startDate).format('MMM D, YYYY')}
+                                                    {timeOff.endDate &&
+                                                        timeOff.endDate !== timeOff.startDate &&
+                                                        ` - ${dayjs(timeOff.endDate).format('MMM D, YYYY')}`}
+                                                </Text>
+                                                {!timeOff.isFullDay &&
+                                                    timeOff.startTime &&
+                                                    timeOff.endTime && (
+                                                        <Text size="xs" c="dimmed">
+                                                            {formatTime(timeOff.startTime)} -{' '}
+                                                            {formatTime(timeOff.endTime)}
+                                                        </Text>
+                                                    )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </Stack>
+                            </Card>
+                        )}
+                    </Grid.Col>
+                </Grid>
             </div>
         </>
     );

@@ -22,7 +22,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
-        if (!isAdminOrOwner(user)) {
+        if (!isAdminOrOwner(user) && userId !== staffId) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 

@@ -38,14 +38,14 @@ export function ScheduleForm({
     }, [initialValues]);
 
     return (
-        <div className="bg-white p-2 min-[900px]:p-6 rounded-xl shadow-sm border border-gray-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <div className="bg-white p-2 sm:p-6 rounded-xl shadow-sm border border-gray-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <form onSubmit={form.onSubmit(onSubmit)} noValidate>
                 <Stack gap={0}>
                     {form.values.schedule.map((item, index) => (
                         <div key={item.dayOfWeek} className="transition-colors hover:bg-gray-50/50">
-                            <div className="flex flex-col min-[900px]:flex-row min-[900px]:items-center justify-between gap-4 min-[900px]:gap-6 p-2 min-[900px]:p-3">
-                                <div className="flex flex-row-reverse min-[900px]:flex-row items-center justify-between min-[900px]:justify-start gap-6 min-[900px]:gap-8 flex-1">
-                                    <div className="min-[900px]:w-32 text-right min-[900px]:text-left">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 p-2 sm:p-3">
+                                <div className="flex flex-row-reverse sm:flex-row items-center justify-between sm:justify-start gap-6 sm:gap-8 flex-1">
+                                    <div className="sm:w-32 text-right sm:text-left">
                                         <Text fw={700} size="md" className="tracking-tight">
                                             {formatDayName(item.dayOfWeek)}
                                         </Text>
@@ -76,12 +76,12 @@ export function ScheduleForm({
                                     />
                                 </div>
 
-                                <div className="flex gap-2 min-[900px]:gap-4 w-full min-[900px]:w-auto justify-between min-[900px]:justify-start">
+                                <div className="flex gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
                                     <ScheduleTimePicker
                                         label="Opening"
                                         size="sm"
                                         disabled={item.isOffDay}
-                                        className="w-[48%] min-[900px]:w-36"
+                                        className="w-[48%] sm:w-36"
                                         value={form.values.schedule[index].startTime ?? ''}
                                         onChange={(value) =>
                                             form.setFieldValue(`schedule.${index}.startTime`, value)
@@ -93,7 +93,7 @@ export function ScheduleForm({
                                         label="Closing"
                                         size="sm"
                                         disabled={item.isOffDay}
-                                        className="w-[48%] min-[900px]:w-36"
+                                        className="w-[48%] sm:w-36"
                                         value={form.values.schedule[index].endTime ?? ''}
                                         onChange={(value) =>
                                             form.setFieldValue(`schedule.${index}.endTime`, value)
@@ -117,7 +117,7 @@ export function ScheduleForm({
                         size="md"
                         loading={isLoading}
                         loaderProps={{ type: 'dots' }}
-                        className="w-full min-[900px]:w-auto"
+                        className="w-full sm:w-auto"
                         radius="md"
                     >
                         {submitLabel}

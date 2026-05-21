@@ -8,6 +8,14 @@ export const staffsApi = apiSlice.injectEndpoints({
             query: () => `/api/private/staffs`,
             providesTags: ['Staffs'],
         }),
+        getStaffSchedule: builder.query<ApiResponse<{ staff: any; workingHours: any[] }>, string>({
+            query: (id) => `/api/private/staffs/${id}/schedule`,
+            providesTags: ['Staffs'],
+        }),
+        getStaffTimeOff: builder.query<ApiResponse<any[]>, string>({
+            query: (id) => `/api/private/staffs/${id}/time-off`,
+            providesTags: ['Staffs'],
+        }),
         deleteStaff: builder.mutation<ApiResponse<null>, string>({
             query: (id) => ({
                 url: `/api/private/staffs/${id}`,
@@ -18,4 +26,9 @@ export const staffsApi = apiSlice.injectEndpoints({
     }),
 });
 
-export const { useGetStaffsQuery, useDeleteStaffMutation } = staffsApi;
+export const {
+    useGetStaffsQuery,
+    useGetStaffScheduleQuery,
+    useGetStaffTimeOffQuery,
+    useDeleteStaffMutation,
+} = staffsApi;

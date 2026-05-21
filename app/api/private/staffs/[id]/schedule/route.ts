@@ -3,13 +3,10 @@ import { prisma } from '@/app/lib/db';
 import { defaultSchedule, STATUS } from '@/constants';
 import { isAdminOrOwner } from '@/app/lib/permissions';
 
-export async function GET(
-    request: Request
-    // { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const userId = request.headers.get('x-user-id') as string;
-        // const { id: staffId } = await params;
+        const { id: staffId } = await params;
 
         const user = await prisma.user.findUnique({
             where: { id: userId },
@@ -20,13 +17,13 @@ export async function GET(
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
-        if (!isAdminOrOwner(user)) {
+        if (!isAdminOrOwner(user) && userId !== staffId) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
         // Verify staff exists
         const staff = await prisma.user.findUnique({
-            where: { id: userId },
+            where: { id: staffId },
             select: { id: true, name: true, avatar: true, position: true },
         });
 
@@ -35,7 +32,7 @@ export async function GET(
         }
 
         const workingHours = await prisma.staffWeeklyHour.findMany({
-            where: { userId: userId },
+            where: { userId: staffId },
         });
 
         if (workingHours.length === 0) {
