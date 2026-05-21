@@ -421,13 +421,19 @@ export default function TimeOffModal({
                                         placeholder="Select day"
                                         data={DAY_OF_WEEK_OPTIONS}
                                         value={
-                                            form.values.repeatDay !== null
-                                                ? String(form.values.repeatDay)
+                                            form.values.repeatDay !== null &&
+                                            form.values.repeatDay !== undefined
+                                                ? (DAY_OF_WEEK_OPTIONS[form.values.repeatDay]
+                                                      ?.value ?? '')
                                                 : ''
                                         }
-                                        onChange={(value) =>
-                                            form.setFieldValue('repeatDay', value as any)
-                                        }
+                                        onChange={(value) => {
+                                            const idx = DAY_OF_WEEK_OPTIONS.findIndex(
+                                                (opt) => opt.value === value
+                                            );
+                                            form.setFieldValue('repeatDay', idx >= 0 ? idx : null);
+                                        }}
+                                        error={form.errors.repeatDay}
                                         styles={{ label: labelStyles }}
                                     />
                                     <FullDayAndTimePickers form={form} />

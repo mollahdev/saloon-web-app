@@ -10,7 +10,7 @@ export default function ScheduleLayout({ children }: PropsWithChildren) {
     const staffs = response?.data || [];
 
     return (
-        <div className="flex flex-col md:flex-row gap-4 md:gap-8 max-w-[1400px] mx-auto w-full h-full">
+        <div className="flex flex-col xl:flex-row gap-4 xl:gap-8 max-w-[1400px] mx-auto w-full h-full">
             <style jsx global>{`
                 .no-scrollbar::-webkit-scrollbar {
                     display: none;

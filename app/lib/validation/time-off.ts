@@ -51,6 +51,35 @@ export const timeOffSchema = z
             message: 'Repeat type is required for recurring time off',
             path: ['repeatType'],
         }
+    )
+    .refine(
+        (data) => {
+            if (
+                data.type === 'RECURRING' &&
+                (data.repeatType === 'WEEKLY' ||
+                    data.repeatType === 'MONTHLY' ||
+                    data.repeatType === 'YEARLY')
+            ) {
+                return data.repeatDay !== null && data.repeatDay !== undefined;
+            }
+            return true;
+        },
+        {
+            message: 'Day selection is required',
+            path: ['repeatDay'],
+        }
+    )
+    .refine(
+        (data) => {
+            if (data.type === 'RECURRING' && data.repeatType === 'YEARLY') {
+                return data.repeatMonth !== null && data.repeatMonth !== undefined;
+            }
+            return true;
+        },
+        {
+            message: 'Month is required for yearly recurrence',
+            path: ['repeatMonth'],
+        }
     );
 
 export type TimeOffFormValues = z.infer<typeof timeOffSchema>;

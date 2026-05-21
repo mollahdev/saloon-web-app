@@ -135,8 +135,8 @@ export default function BusinessSchedulePage() {
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
                 tabs={[
-                    { id: 'schedule', label: 'Opening Hours' },
-                    { id: 'timeoff', label: 'Business Closures' },
+                    { id: 'schedule', label: 'Schedule' },
+                    { id: 'timeoff', label: 'Time Off' },
                 ]}
             />
 

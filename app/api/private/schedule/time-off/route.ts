@@ -76,6 +76,14 @@ export async function POST(request: Request) {
         });
     } catch (error: any) {
         console.error('Create time off error:', error);
-        return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+        return NextResponse.json(
+            {
+                message: 'Internal server error',
+                error: error?.message || String(error),
+                code: error?.code || null,
+                meta: error?.meta || null,
+            },
+            { status: 500 }
+        );
     }
 }
