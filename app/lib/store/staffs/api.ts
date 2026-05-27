@@ -8,6 +8,10 @@ export const staffsApi = apiSlice.injectEndpoints({
             query: () => `/api/private/staffs`,
             providesTags: ['Staffs'],
         }),
+        getStaff: builder.query<ApiResponse<Profile>, string>({
+            query: (id) => `/api/private/staffs/${id}`,
+            providesTags: ['Staffs'],
+        }),
         getStaffSchedule: builder.query<ApiResponse<{ staff: any; workingHours: any[] }>, string>({
             query: (id) => `/api/private/staffs/${id}/schedule`,
             providesTags: ['Staffs'],
@@ -31,13 +35,30 @@ export const staffsApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['Staffs'],
         }),
+        updateStaff: builder.mutation<ApiResponse<Profile>, { id: string; body: any }>({
+            query: ({ id, body }) => ({
+                url: `/api/private/staffs/${id}`,
+                method: 'PUT',
+                body,
+            }),
+            invalidatesTags: ['Staffs'],
+        }),
+        sendResetPasswordLink: builder.mutation<ApiResponse<null>, string>({
+            query: (id) => ({
+                url: `/api/private/staffs/${id}/reset-password`,
+                method: 'POST',
+            }),
+        }),
     }),
 });
 
 export const {
     useGetStaffsQuery,
+    useGetStaffQuery,
     useGetStaffScheduleQuery,
     useGetStaffTimeOffQuery,
     useDeleteStaffMutation,
     useCreateStaffMutation,
+    useUpdateStaffMutation,
+    useSendResetPasswordLinkMutation,
 } = staffsApi;

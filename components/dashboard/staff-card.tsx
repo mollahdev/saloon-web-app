@@ -13,6 +13,7 @@ import {
 } from '@mantine/core';
 import { HiOutlineTrash } from 'react-icons/hi';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Profile } from '@/models/profile';
 import { ROLE, STATUS } from '@/constants';
 import { useConfirmation } from '@/hooks/use-confirmation';
@@ -21,6 +22,7 @@ import toast from 'react-hot-toast';
 
 interface StaffCardProps {
     staff: Profile;
+    onEdit: (staff: Profile) => void;
 }
 
 const roleColors: Record<string, string> = {
@@ -36,9 +38,18 @@ const statusColors: Record<string, string> = {
     [STATUS.LOCKED]: 'red',
 };
 
-export function StaffCard({ staff }: StaffCardProps) {
+export function StaffCard({ staff, onEdit }: StaffCardProps) {
     const { confirm } = useConfirmation();
     const [deleteStaff] = useDeleteStaffMutation();
+    const router = useRouter();
+
+    const handleEditClick = () => {
+        if (staff.status === STATUS.PENDING_VERIFICATION) {
+            onEdit(staff);
+        } else {
+            router.push(`/admin/staffs/${staff.id}`);
+        }
+    };
 
     const handleDeleteClick = () => {
         confirm({
@@ -118,6 +129,7 @@ export function StaffCard({ staff }: StaffCardProps) {
                     size="sm"
                     px={12}
                     className="flex-initial h-9 transition-all hover:bg-blue-100 font-bold text-[13px]"
+                    onClick={handleEditClick}
                 >
                     Edit
                 </Button>

@@ -10,14 +10,17 @@ import {
     Group,
     Divider,
 } from '@mantine/core';
+import { useEffect } from 'react';
 import { schemaResolver, useForm } from '@mantine/form';
 import toast from 'react-hot-toast';
-import { useCreateStaffMutation } from '@/app/lib/store/staffs/api';
+import { useCreateStaffMutation, useUpdateStaffMutation } from '@/app/lib/store/staffs/api';
 import { createStaffSchema, CreateStaffValues } from '@/app/lib/validation/staff';
+import { Profile } from '@/models/profile';
 
 interface CreateStaffModalProps {
     opened: boolean;
     onClose: () => void;
+    staff?: Profile | null;
 }
 
 const labelStyles = {
@@ -28,8 +31,10 @@ const labelStyles = {
     marginBottom: 4,
 };
 
-export default function CreateStaffModal({ opened, onClose }: CreateStaffModalProps) {
-    const [createStaff, { isLoading }] = useCreateStaffMutation();
+export default function CreateStaffModal({ opened, onClose, staff }: CreateStaffModalProps) {
+    const [createStaff, { isLoading: isCreating }] = useCreateStaffMutation();
+    const [updateStaff, { isLoading: isUpdating }] = useUpdateStaffMutation();
+    const isLoading = isCreating || isUpdating;
 
     const form = useForm<CreateStaffValues>({
         initialValues: {
@@ -42,14 +47,46 @@ export default function CreateStaffModal({ opened, onClose }: CreateStaffModalPr
         validate: schemaResolver(createStaffSchema),
     });
 
+    useEffect(() => {
+        if (opened) {
+            if (staff) {
+                form.setValues({
+                    name: staff.name || '',
+                    email: staff.email || '',
+                    position: staff.position || 'Barber/Stylist',
+                    role: staff.role === 'OWNER' ? 'ADMIN' : staff.role || 'MEMBER',
+                    bio: staff.bio || '',
+                });
+            } else {
+                form.reset();
+            }
+        }
+    }, [staff, opened, form]);
+
     const handleFormSubmit = async (values: CreateStaffValues) => {
         try {
-            const response = await createStaff(values).unwrap();
-            toast.success(response.message || 'Staff member created successfully');
+            if (staff) {
+                const body = {
+                    name: values.name,
+                    email: values.email,
+                    position: values.position,
+                    bio: values.bio,
+                    role: values.role,
+                    status: staff.status,
+                    phone: staff.phone,
+                    address: staff.address,
+                    avatar: staff.avatar,
+                };
+                const response = await updateStaff({ id: staff.id, body }).unwrap();
+                toast.success(response.message || 'Staff member updated successfully');
+            } else {
+                const response = await createStaff(values).unwrap();
+                toast.success(response.message || 'Staff member created successfully');
+            }
             onClose();
             form.reset();
         } catch (error: any) {
-            toast.error(error?.data?.message || 'Failed to create staff member');
+            toast.error(error?.data?.message || 'Failed to save staff member');
         }
     };
 
@@ -64,7 +101,7 @@ export default function CreateStaffModal({ opened, onClose }: CreateStaffModalPr
             onClose={handleClose}
             title={
                 <Text fw={700} size="lg">
-                    Create Staff Member
+                    {staff ? 'Edit Staff Member' : 'Create Staff Member'}
                 </Text>
             }
             size="md"
@@ -128,7 +165,7 @@ export default function CreateStaffModal({ opened, onClose }: CreateStaffModalPr
                             Cancel
                         </Button>
                         <Button type="submit" loading={isLoading}>
-                            Create Staff
+                            {staff ? 'Save Changes' : 'Create Staff'}
                         </Button>
                     </Group>
                 </Stack>

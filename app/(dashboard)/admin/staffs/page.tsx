@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { SimpleGrid, Button } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { size } from 'lodash';
@@ -11,11 +12,23 @@ import { PageTitle } from '@/utils/portal';
 import { useGetStaffsQuery } from '@/app/lib/store/staffs/api';
 import { StaffCard } from '@/components/dashboard/staff-card';
 import CreateStaffModal from '@/components/dashboard/create-staff-modal';
+import { Profile } from '@/models/profile';
 
 export default function StaffsPage() {
     const { data: response, isLoading, error } = useGetStaffsQuery();
     const staffs = response?.data || [];
     const [opened, { open, close }] = useDisclosure(false);
+    const [selectedStaff, setSelectedStaff] = useState<Profile | null>(null);
+
+    const handleEditClick = (staff: Profile) => {
+        setSelectedStaff(staff);
+        open();
+    };
+
+    const handleClose = () => {
+        setSelectedStaff(null);
+        close();
+    };
 
     if (isLoading) {
         return (
@@ -49,14 +62,26 @@ export default function StaffsPage() {
                             Manage saloon staff and scheduling
                         </p>
                     </div>
-                    <Button id="create-staff-btn" onClick={open} size="md">
+                    <Button
+                        id="create-staff-btn"
+                        onClick={() => {
+                            setSelectedStaff(null);
+                            open();
+                        }}
+                        size="md"
+                    >
                         Create Staff
                     </Button>
                 </div>
             )}
 
             {size(staffs) === 0 ? (
-                <StaffsEmpty onCreateClick={open} />
+                <StaffsEmpty
+                    onCreateClick={() => {
+                        setSelectedStaff(null);
+                        open();
+                    }}
+                />
             ) : (
                 <SimpleGrid
                     cols={{ base: 1, sm: 2, lg: 3, xl: 4 }}
@@ -64,12 +89,12 @@ export default function StaffsPage() {
                     verticalSpacing="lg"
                 >
                     {staffs.map((staff) => (
-                        <StaffCard key={staff.id} staff={staff} />
+                        <StaffCard key={staff.id} staff={staff} onEdit={handleEditClick} />
                     ))}
                 </SimpleGrid>
             )}
 
-            <CreateStaffModal opened={opened} onClose={close} />
+            <CreateStaffModal opened={opened} onClose={handleClose} staff={selectedStaff} />
         </div>
     );
 }
