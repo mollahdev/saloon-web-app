@@ -4,7 +4,7 @@ import { STATUS } from '@/constants';
 import { isAdminOrOwner } from '@/app/lib/permissions';
 
 /**
- * DELETE /api/private/staffs/:id/time-off/:timeOffId
+ * DELETE /api/private/schedule/staffs/:id/time-off/:timeOffId
  * Delete a specific time-off entry
  */
 export async function DELETE(

@@ -21,7 +21,7 @@ export interface TimeOffEntry {
 export const timeOffApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getTimeOffs: builder.query<{ message: string; data: TimeOffEntry[] }, string>({
-            query: (staffId) => `/api/private/staffs/${staffId}/time-off`,
+            query: (staffId) => `/api/private/schedule/staffs/${staffId}/time-off`,
             providesTags: (_result, _err, staffId) => [{ type: 'TimeOff', id: staffId }],
         }),
         createTimeOff: builder.mutation<
@@ -29,7 +29,7 @@ export const timeOffApi = apiSlice.injectEndpoints({
             { staffId: string; body: TimeOffFormValues }
         >({
             query: ({ staffId, body }) => ({
-                url: `/api/private/staffs/${staffId}/time-off`,
+                url: `/api/private/schedule/staffs/${staffId}/time-off`,
                 method: 'POST',
                 body,
             }),
@@ -40,7 +40,7 @@ export const timeOffApi = apiSlice.injectEndpoints({
             { staffId: string; timeOffId: string; body: TimeOffFormValues }
         >({
             query: ({ staffId, timeOffId, body }) => ({
-                url: `/api/private/staffs/${staffId}/time-off/${timeOffId}`,
+                url: `/api/private/schedule/staffs/${staffId}/time-off/${timeOffId}`,
                 method: 'PUT',
                 body,
             }),
@@ -51,7 +51,7 @@ export const timeOffApi = apiSlice.injectEndpoints({
             { staffId: string; timeOffId: string }
         >({
             query: ({ staffId, timeOffId }) => ({
-                url: `/api/private/staffs/${staffId}/time-off/${timeOffId}`,
+                url: `/api/private/schedule/staffs/${staffId}/time-off/${timeOffId}`,
                 method: 'DELETE',
             }),
             invalidatesTags: (_result, _err, { staffId }) => [{ type: 'TimeOff', id: staffId }],

@@ -62,8 +62,8 @@ export function StaffCard({ staff, onEdit }: StaffCardProps) {
                     await deleteStaff(staff.id).unwrap();
                     toast.success('Staff member deleted successfully');
                 } catch (error: any) {
-                    toast.error(error?.data?.message || 'Failed to delete staff member');
-                    throw error; // Rethrow to keep modal state if needed, though provider closes on success
+                    // Rethrow to keep modal state if needed, error message is handled globally by rtkErrorMiddleware
+                    throw error;
                 }
             },
         });

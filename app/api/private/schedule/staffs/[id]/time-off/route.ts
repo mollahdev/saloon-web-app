@@ -5,7 +5,7 @@ import { isAdminOrOwner } from '@/app/lib/permissions';
 import { timeOffSchema } from '@/app/lib/validation/time-off';
 
 /**
- * GET /api/private/staffs/:id/time-off
+ * GET /api/private/schedule/staffs/:id/time-off
  * List all time-off entries for a staff member
  */
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -42,7 +42,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 /**
- * POST /api/private/staffs/:id/time-off
+ * POST /api/private/schedule/staffs/:id/time-off
  * Create a new time-off entry for a staff member
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {

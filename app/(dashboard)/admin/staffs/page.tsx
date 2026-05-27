@@ -70,7 +70,7 @@ export default function StaffsPage() {
                         }}
                         size="md"
                     >
-                        Create Staff
+                        Add New Staff
                     </Button>
                 </div>
             )}

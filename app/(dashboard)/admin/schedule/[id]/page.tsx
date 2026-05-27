@@ -10,7 +10,7 @@ import { ScheduleValues } from '@/app/lib/validation/schedule';
 import {
     useGetStaffScheduleQuery,
     useUpdateStaffScheduleMutation,
-} from '@/app/lib/store/staffs/schedule-api';
+} from '@/app/lib/store/staffs/api';
 import {
     useGetTimeOffsQuery,
     useCreateTimeOffMutation,

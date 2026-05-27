@@ -61,7 +61,8 @@ export default function CreateStaffModal({ opened, onClose, staff }: CreateStaff
                 form.reset();
             }
         }
-    }, [staff, opened, form]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [staff, opened]);
 
     const handleFormSubmit = async (values: CreateStaffValues) => {
         try {
@@ -85,8 +86,8 @@ export default function CreateStaffModal({ opened, onClose, staff }: CreateStaff
             }
             onClose();
             form.reset();
-        } catch (error: any) {
-            toast.error(error?.data?.message || 'Failed to save staff member');
+        } catch {
+            // Error is handled globally by rtkErrorMiddleware
         }
     };
 

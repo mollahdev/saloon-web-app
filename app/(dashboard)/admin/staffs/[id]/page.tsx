@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
     Button,
@@ -16,12 +16,13 @@ import {
     Group,
     Stack,
     Badge,
-    Center,
     Switch,
+    Loader,
 } from '@mantine/core';
 import { schemaResolver, useForm } from '@mantine/form';
 import toast from 'react-hot-toast';
-import { HiOutlineArrowLeft } from 'react-icons/hi';
+import { HiOutlineArrowLeft, HiOutlineUpload } from 'react-icons/hi';
+import { useAppSelector } from '@/app/lib/store';
 
 /**
  * Internal dependencies
@@ -34,16 +35,7 @@ import {
 } from '@/app/lib/store/staffs/api';
 import { updateStaffSchema, UpdateStaffValues } from '@/app/lib/validation/staff';
 import { STATUS } from '@/constants';
-
-const presetAvatars = [
-    'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png',
-    'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png',
-    'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-3.png',
-    'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-4.png',
-    'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-5.png',
-    'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-6.png',
-    'https://static.vecteezy.com/system/resources/previews/052/523/015/non_2x/3d-icon-avatar-cartoon-character-smiling-man-learning-people-close-up-portrait-on-isolated-on-transparent-background-png.png',
-];
+import StaffDetailLoading from './loading';
 
 const labelStyles = {
     fontSize: 11,
@@ -55,7 +47,6 @@ const labelStyles = {
 
 export default function StaffDetailPage() {
     const params = useParams();
-    const router = useRouter();
     const id = params.id as string;
 
     const { data: staffResponse, isLoading, error } = useGetStaffQuery(id);
@@ -63,12 +54,65 @@ export default function StaffDetailPage() {
     const [updateStaff, { isLoading: isUpdating }] = useUpdateStaffMutation();
     const [sendResetLink, { isLoading: isSendingReset }] = useSendResetPasswordLinkMutation();
 
+    const accessToken = useAppSelector((state) => state.auth.accessToken);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+    const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Validate MIME type
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            toast.error('Invalid file type. Only JPEG, PNG, WEBP, and GIF are allowed.');
+            return;
+        }
+
+        // Validate file size (5MB limit)
+        const maxSizeBytes = 5 * 1024 * 1024;
+        if (file.size > maxSizeBytes) {
+            toast.error('File size exceeds the 5MB limit.');
+            return;
+        }
+
+        setIsUploadingImage(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/api/private/upload', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.message || 'Upload failed');
+            }
+
+            const result = await response.json();
+            form.setFieldValue('avatar', result.data.url);
+            toast.success('Avatar uploaded successfully');
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to upload avatar');
+        } finally {
+            setIsUploadingImage(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
+
     const handleSendResetLink = async () => {
         try {
             const response = await sendResetLink(id).unwrap();
             toast.success(response.message || 'Reset password link sent successfully');
-        } catch (error: any) {
-            toast.error(error?.data?.message || 'Failed to send reset password link');
+        } catch {
+            // Error is handled globally by rtkErrorMiddleware
         }
     };
 
@@ -103,16 +147,11 @@ export default function StaffDetailPage() {
                 password: '',
             });
         }
-    }, [staff, form]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [staff]);
 
     if (isLoading) {
-        return (
-            <Center style={{ minHeight: '400px' }}>
-                <Text size="lg" fw={500} c="dimmed">
-                    Loading staff details...
-                </Text>
-            </Center>
-        );
+        return <StaffDetailLoading />;
     }
 
     if (error || !staff) {
@@ -142,9 +181,8 @@ export default function StaffDetailPage() {
             };
             const response = await updateStaff({ id, body }).unwrap();
             toast.success(response.message || 'Staff member details updated successfully');
-            router.push('/admin/staffs');
-        } catch (error: any) {
-            toast.error(error?.data?.message || 'Failed to update staff member');
+        } catch {
+            // Error is handled globally by rtkErrorMiddleware
         }
     };
 
@@ -180,15 +218,59 @@ export default function StaffDetailPage() {
                                 <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-500" />
 
                                 <Stack align="center" gap="md" className="mt-2">
-                                    <div className="relative">
-                                        <Avatar
-                                            src={form.values.avatar || staff.avatar}
-                                            size={120}
-                                            radius={120}
-                                            className="border-4 border-gray-50 shadow-md"
+                                    <div className="relative group">
+                                        {/* Hidden file input */}
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            onChange={handleUpload}
+                                            accept="image/png,image/jpeg,image/gif,image/webp"
+                                            style={{ display: 'none' }}
                                         />
+
                                         <div
-                                            className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-4 border-white ${
+                                            className={`relative rounded-full overflow-hidden border-4 border-gray-50 shadow-md transition-all hover:scale-102 active:scale-98 ${
+                                                isUploadingImage ? 'opacity-80' : ''
+                                            }`}
+                                            style={{ width: 120, height: 120 }}
+                                        >
+                                            <Avatar
+                                                src={form.values.avatar || staff.avatar}
+                                                size={112}
+                                                radius={112}
+                                            />
+
+                                            {/* Hover Overlay */}
+                                            <div
+                                                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white cursor-pointer"
+                                                onClick={() =>
+                                                    !isUploadingImage &&
+                                                    fileInputRef.current?.click()
+                                                }
+                                            >
+                                                <HiOutlineUpload size={20} />
+                                                <Text
+                                                    size="10px"
+                                                    fw={600}
+                                                    style={{
+                                                        textTransform: 'uppercase',
+                                                        marginTop: 2,
+                                                    }}
+                                                >
+                                                    Upload
+                                                </Text>
+                                            </div>
+
+                                            {/* Loading Overlay */}
+                                            {isUploadingImage && (
+                                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white">
+                                                    <Loader size="xs" color="white" />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div
+                                            className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-4 border-white z-10 ${
                                                 form.values.status === STATUS.ACTIVE
                                                     ? 'bg-teal-500'
                                                     : 'bg-gray-400'
@@ -220,46 +302,6 @@ export default function StaffDetailPage() {
                                             {form.values.status}
                                         </Badge>
                                     </Group>
-                                </Stack>
-                            </Card>
-
-                            <Card withBorder radius="lg" className="bg-white p-6 shadow-sm">
-                                <Text fw={700} size="sm" mb="md" styles={{ root: labelStyles }}>
-                                    Avatar Customization
-                                </Text>
-
-                                <Stack gap="md">
-                                    {/* Presets */}
-                                    <div>
-                                        <Text size="xs" fw={600} c="dimmed" mb="xs">
-                                            Select Preset Avatar
-                                        </Text>
-                                        <Group gap="xs" justify="flex-start">
-                                            {presetAvatars.map((url, idx) => (
-                                                <button
-                                                    key={idx}
-                                                    type="button"
-                                                    onClick={() =>
-                                                        form.setFieldValue('avatar', url)
-                                                    }
-                                                    className={`relative p-0.5 rounded-full border-2 transition-all hover:scale-105 ${
-                                                        form.values.avatar === url
-                                                            ? 'border-blue-500 scale-105 shadow-sm'
-                                                            : 'border-transparent'
-                                                    }`}
-                                                >
-                                                    <Avatar src={url} size={40} radius="xl" />
-                                                </button>
-                                            ))}
-                                        </Group>
-                                    </div>
-
-                                    <TextInput
-                                        label="Custom Avatar URL"
-                                        placeholder="Paste custom image URL..."
-                                        {...form.getInputProps('avatar')}
-                                        styles={{ label: labelStyles }}
-                                    />
                                 </Stack>
                             </Card>
                         </Stack>

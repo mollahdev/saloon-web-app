@@ -105,6 +105,8 @@ interface SidebarItemProps {
 }
 
 function SidebarItem({ isActive, label, subLabel, icon, desktopIcon, avatar }: SidebarItemProps) {
+    const isStaff = !icon && !desktopIcon;
+
     return (
         <div
             className={classNames(
@@ -116,9 +118,9 @@ function SidebarItem({ isActive, label, subLabel, icon, desktopIcon, avatar }: S
             )}
         >
             <div className="relative">
-                {avatar ? (
+                {isStaff ? (
                     <Avatar
-                        src={avatar}
+                        src={avatar || undefined}
                         size={28}
                         radius={28}
                         className={classNames(
@@ -146,7 +148,7 @@ function SidebarItem({ isActive, label, subLabel, icon, desktopIcon, avatar }: S
                         {desktopIcon}
                     </div>
                 )}
-                {isActive && avatar && (
+                {isActive && isStaff && (
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-primary rounded-full border-2 border-white xl:flex items-center justify-center hidden">
                         <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                     </div>
