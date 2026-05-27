@@ -92,7 +92,7 @@ export function StaffCard({ staff }: StaffCardProps) {
                     </Text>
                 </div>
 
-                <Group gap="xs" mt="xs">
+                <Group justify="center" gap="xs" mt="xs">
                     <Badge
                         color={roleColors[staff.role]}
                         variant="light"
@@ -102,7 +102,9 @@ export function StaffCard({ staff }: StaffCardProps) {
                         {staff.role}
                     </Badge>
                     <Badge color={statusColors[staff.status]} variant="dot" size="sm">
-                        {staff.status.replace(/_/g, ' ')}
+                        {staff.status === STATUS.PENDING_VERIFICATION
+                            ? 'PENDING'
+                            : staff.status.replace(/_/g, ' ')}
                     </Badge>
                 </Group>
             </Stack>
@@ -120,18 +122,31 @@ export function StaffCard({ staff }: StaffCardProps) {
                     Edit
                 </Button>
 
-                <Link href={`/admin/schedule/${staff.id}`} className="flex-1">
+                {staff.status === STATUS.PENDING_VERIFICATION ? (
                     <Button
+                        disabled
                         variant="light"
                         color="teal"
                         size="sm"
                         px={6}
-                        fullWidth
-                        className="h-9 transition-all hover:bg-teal-100 font-bold text-[13px]"
+                        className="flex-1 h-9 font-bold text-[13px]"
                     >
                         Schedule
                     </Button>
-                </Link>
+                ) : (
+                    <Link href={`/admin/schedule/${staff.id}`} className="flex-1">
+                        <Button
+                            variant="light"
+                            color="teal"
+                            size="sm"
+                            px={6}
+                            fullWidth
+                            className="h-9 transition-all hover:bg-teal-100 font-bold text-[13px]"
+                        >
+                            Schedule
+                        </Button>
+                    </Link>
+                )}
 
                 <Tooltip label="Delete Staff" withArrow>
                     <ActionIcon

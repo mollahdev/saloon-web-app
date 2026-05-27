@@ -23,6 +23,14 @@ export const staffsApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['Staffs'],
         }),
+        createStaff: builder.mutation<ApiResponse<Profile>, Partial<Profile>>({
+            query: (body) => ({
+                url: `/api/private/staffs`,
+                method: 'POST',
+                body,
+            }),
+            invalidatesTags: ['Staffs'],
+        }),
     }),
 });
 
@@ -31,4 +39,5 @@ export const {
     useGetStaffScheduleQuery,
     useGetStaffTimeOffQuery,
     useDeleteStaffMutation,
+    useCreateStaffMutation,
 } = staffsApi;

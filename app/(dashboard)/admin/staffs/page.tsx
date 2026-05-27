@@ -1,16 +1,21 @@
 'use client';
-import { SimpleGrid, Text } from '@mantine/core';
+import { SimpleGrid, Button } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { size } from 'lodash';
 /**
  * Internal dependencies
  */
 import StaffsLoading from './loading';
+import StaffsEmpty from './empty';
 import { PageTitle } from '@/utils/portal';
 import { useGetStaffsQuery } from '@/app/lib/store/staffs/api';
 import { StaffCard } from '@/components/dashboard/staff-card';
+import CreateStaffModal from '@/components/dashboard/create-staff-modal';
 
 export default function StaffsPage() {
     const { data: response, isLoading, error } = useGetStaffsQuery();
     const staffs = response?.data || [];
+    const [opened, { open, close }] = useDisclosure(false);
 
     if (isLoading) {
         return (
@@ -36,10 +41,22 @@ export default function StaffsPage() {
         <div className="max-w-[1300px] mx-auto w-full">
             <PageTitle.Source>Staffs</PageTitle.Source>
 
-            {staffs.length === 0 ? (
-                <div className="bg-white p-12 rounded-lg shadow-sm border border-gray-100 text-center">
-                    <Text c="dimmed">No staff members found.</Text>
+            {size(staffs) !== 0 && (
+                <div className="flex flex-col gap-2 md:flex-row justify-between items-start md:items-center mb-6">
+                    <div>
+                        <h1 className="text-xl font-bold text-gray-800">Staff Members</h1>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Manage saloon staff and scheduling
+                        </p>
+                    </div>
+                    <Button id="create-staff-btn" onClick={open} size="md">
+                        Create Staff
+                    </Button>
                 </div>
+            )}
+
+            {size(staffs) === 0 ? (
+                <StaffsEmpty onCreateClick={open} />
             ) : (
                 <SimpleGrid
                     cols={{ base: 1, sm: 2, lg: 3, xl: 4 }}
@@ -51,6 +68,8 @@ export default function StaffsPage() {
                     ))}
                 </SimpleGrid>
             )}
+
+            <CreateStaffModal opened={opened} onClose={close} />
         </div>
     );
 }

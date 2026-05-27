@@ -33,6 +33,8 @@ export const ROLE = {
     MEMBER: 'MEMBER',
 } as const;
 
+export type ROLE_TYPE = (typeof ROLE)[keyof typeof ROLE];
+
 export const STATUS = {
     ACTIVE: 'ACTIVE',
     INACTIVE: 'INACTIVE',
