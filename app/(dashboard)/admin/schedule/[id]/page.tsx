@@ -17,6 +17,7 @@ import {
     useUpdateTimeOffMutation,
     useDeleteTimeOffMutation,
 } from '@/app/lib/store/staffs/time-off-api';
+import { useGetScheduleQuery } from '@/app/lib/store/schedule/api';
 import { TimeOffFormValues } from '@/app/lib/validation/time-off';
 import { defaultSchedule } from '@/constants';
 import TimeOffSection, { TimeOffData } from '@/components/dashboard/time-off-section';
@@ -28,11 +29,14 @@ export default function StaffSchedulePage() {
     const [activeTab, setActiveTab] = useState<'schedule' | 'timeoff'>('schedule');
     const { data: response, isLoading, error } = useGetStaffScheduleQuery(id);
     const { data: timeOffRes, isLoading: isLoadingTimeOff } = useGetTimeOffsQuery(id);
+    const { data: businessScheduleRes } = useGetScheduleQuery();
     const [updateSchedule, { isLoading: isUpdating }] = useUpdateStaffScheduleMutation();
     const [createTimeOff] = useCreateTimeOffMutation();
     const [updateTimeOff] = useUpdateTimeOffMutation();
     const [deleteTimeOff] = useDeleteTimeOffMutation();
     const staff = response?.data?.staff;
+
+    const businessSchedule = businessScheduleRes?.data?.schedule;
 
     // Time off modal state — managed here, passed down to TimeOffSection
     const [opened, { open, close }] = useDisclosure(false);
@@ -167,6 +171,7 @@ export default function StaffSchedulePage() {
                     onSubmit={handleSubmit}
                     isLoading={isUpdating}
                     submitLabel="Update Schedule"
+                    businessSchedule={businessSchedule}
                 />
             )}
 
