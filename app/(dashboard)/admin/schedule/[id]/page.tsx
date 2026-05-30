@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { PageTitle } from '@/utils/portal';
@@ -38,6 +38,21 @@ export default function StaffSchedulePage() {
     const [opened, { open, close }] = useDisclosure(false);
     const [editingEntry, setEditingEntry] = useState<TimeOffData | null>(null);
     const { confirm } = useConfirmation();
+
+    const initialValues = useMemo(() => {
+        return (
+            response?.data?.schedule?.map((wh: any) => ({
+                ...wh,
+                startTime: wh.startTime.substring(0, 5),
+                endTime: wh.endTime.substring(0, 5),
+            })) ||
+            defaultSchedule.map((wh) => ({
+                ...wh,
+                startTime: wh.startTime.substring(0, 5),
+                endTime: wh.endTime.substring(0, 5),
+            }))
+        );
+    }, [response?.data?.schedule]);
 
     if (isLoading || isLoadingTimeOff) {
         return (
@@ -128,18 +143,6 @@ export default function StaffSchedulePage() {
         });
     };
 
-    const initialValues =
-        response?.data?.schedule?.map((wh: any) => ({
-            ...wh,
-            startTime: wh.startTime.substring(0, 5),
-            endTime: wh.endTime.substring(0, 5),
-        })) ||
-        defaultSchedule.map((wh) => ({
-            ...wh,
-            startTime: wh.startTime.substring(0, 5),
-            endTime: wh.endTime.substring(0, 5),
-        }));
-
     return (
         <div className="max-w-3xl w-full pb-10">
             <SchedulePageHeader
@@ -152,7 +155,7 @@ export default function StaffSchedulePage() {
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
                 tabs={[
-                    { id: 'schedule', label: 'Weekly Schedule' },
+                    { id: 'schedule', label: 'Schedule' },
                     { id: 'timeoff', label: 'Time Off' },
                 ]}
             />

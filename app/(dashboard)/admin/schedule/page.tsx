@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { PageTitle } from '@/utils/portal';
 import { useDisclosure } from '@mantine/hooks';
@@ -32,6 +32,22 @@ export default function BusinessSchedulePage() {
     const [opened, { open, close }] = useDisclosure(false);
     const [editingEntry, setEditingEntry] = useState<TimeOffData | null>(null);
     const { confirm } = useConfirmation();
+
+    const initialValues = useMemo(() => {
+        return (
+            response?.data?.schedule
+                ?.map((wh: any) => ({
+                    ...wh,
+                    startTime: wh.startTime,
+                    endTime: wh.endTime,
+                }))
+                .sort(
+                    (a: any, b: any) =>
+                        workingDayOptions.indexOf(a.dayOfWeek) -
+                        workingDayOptions.indexOf(b.dayOfWeek)
+                ) || []
+        );
+    }, [response?.data?.schedule]);
 
     if (isLoading || isLoadingTimeOff) {
         return (
@@ -112,21 +128,6 @@ export default function BusinessSchedulePage() {
         });
     };
 
-    const initialValues = {
-        schedule:
-            response?.data?.schedule
-                ?.map((wh: any) => ({
-                    ...wh,
-                    startTime: wh.startTime,
-                    endTime: wh.endTime,
-                }))
-                .sort(
-                    (a: any, b: any) =>
-                        workingDayOptions.indexOf(a.dayOfWeek) -
-                        workingDayOptions.indexOf(b.dayOfWeek)
-                ) || [],
-    };
-
     return (
         <div className="max-w-3xl w-full pb-10">
             <SchedulePageHeader
@@ -143,7 +144,7 @@ export default function BusinessSchedulePage() {
             {/* Weekly Schedule */}
             {activeTab === 'schedule' && (
                 <ScheduleForm
-                    initialValues={initialValues.schedule}
+                    initialValues={initialValues}
                     onSubmit={handleScheduleSubmit}
                     isLoading={isUpdating}
                     submitLabel="Update Schedule"
