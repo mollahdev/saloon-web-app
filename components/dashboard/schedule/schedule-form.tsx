@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, Divider, Switch, Stack, Text, Badge } from '@mantine/core';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { schemaResolver, useForm } from '@mantine/form';
 import { ScheduleSchema, ScheduleValues } from '@/app/lib/validation/schedule';
 import ScheduleTimePicker from '@/components/dashboard/schedule-time-picker';
@@ -19,6 +19,45 @@ const formatDayName = (day: string) => {
     return day.charAt(0) + day.slice(1).toLowerCase();
 };
 
+/**
+ * Normalise a time string to HH:mm for string comparison.
+ * Accepts "HH:mm" or "HH:mm:ss".
+ */
+const toHHMM = (t: string) => t.substring(0, 5);
+
+/**
+ * Clamp `value` so it stays within [min, max].
+ * All args may be "HH:mm" or "HH:mm:ss" — comparison is done on HH:mm.
+ * Returns the (possibly clamped) HH:mm string, or the original value when
+ * no bounds are defined.
+ */
+const clampTime = (value: string, min?: string, max?: string): string => {
+    if (!value) return value;
+    const v = toHHMM(value);
+    if (min && v < toHHMM(min)) return toHHMM(min);
+    if (max && v > toHHMM(max)) return toHHMM(max);
+    return v;
+};
+
+/**
+ * Generate an array of "HH:mm" strings from `start` to `end` (inclusive)
+ * at `step` minute intervals. Both bounds accept "HH:mm" or "HH:mm:ss".
+ */
+const buildTimePresets = (start?: string, end?: string, step = 5): string[] => {
+    if (!start || !end) return [];
+    const [startH, startM] = toHHMM(start).split(':').map(Number);
+    const [endH, endM] = toHHMM(end).split(':').map(Number);
+    const startMins = startH * 60 + startM;
+    const endMins = endH * 60 + endM;
+    const times: string[] = [];
+    for (let m = startMins; m <= endMins; m += step) {
+        const h = Math.floor(m / 60);
+        const min = m % 60;
+        times.push(`${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
+    }
+    return times;
+};
+
 export function ScheduleForm({
     initialValues,
     onSubmit,
@@ -34,16 +73,42 @@ export function ScheduleForm({
     });
 
     /** Set of day names that are closed in the business schedule */
-    const businessClosedDays = new Set(
-        businessSchedule?.filter((d) => d.isOffDay).map((d) => d.dayOfWeek) ?? []
+    const businessClosedDays = useMemo(
+        () => new Set(businessSchedule?.filter((d) => d.isOffDay).map((d) => d.dayOfWeek) ?? []),
+        [businessSchedule]
     );
 
+    /** Per-day business hours for min/max enforcement */
+    const businessScheduleMap = useMemo(
+        () => new Map(businessSchedule?.map((d) => [d.dayOfWeek, d]) ?? []),
+        [businessSchedule]
+    );
+
+    /** Clamp a schedule array's times against the current business bounds */
+    const clampScheduleToBusinessHours = (schedule: ScheduleValues['schedule']) =>
+        schedule.map((item) => {
+            const entry = businessScheduleMap.get(item.dayOfWeek);
+            // Don't clamp if the business is closed that day (whole row is already locked)
+            if (!entry || entry.isOffDay) return item;
+            return {
+                ...item,
+                startTime: item.startTime
+                    ? clampTime(item.startTime, entry.startTime, entry.endTime)
+                    : item.startTime,
+                endTime: item.endTime
+                    ? clampTime(item.endTime, entry.startTime, entry.endTime)
+                    : item.endTime,
+            };
+        });
+
+    // Re-clamp whenever initialValues or businessScheduleMap changes.
+    // Using initialValues (not form values) as the source of truth avoids
+    // progressive tightening when the user edits times.
     useEffect(() => {
-        if (initialValues && initialValues.length > 0) {
-            form.setValues({ schedule: initialValues });
-        }
+        if (!initialValues || initialValues.length === 0) return;
+        form.setValues({ schedule: clampScheduleToBusinessHours(initialValues) });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialValues]);
+    }, [initialValues, businessScheduleMap]);
 
     return (
         <div className="bg-white p-2 sm:p-6 rounded-xl shadow-sm border border-gray-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -53,6 +118,12 @@ export function ScheduleForm({
                         const isBusinessClosed = businessClosedDays.has(item.dayOfWeek);
                         // Staff's own off-day setting — never overridden by business schedule
                         const isOffDay = item.isOffDay;
+                        // Business hours boundaries for this day (if available)
+                        const businessEntry = businessScheduleMap.get(item.dayOfWeek);
+                        const minTime = businessEntry?.startTime ?? undefined;
+                        const maxTime = businessEntry?.endTime ?? undefined;
+                        // Presets: only times within business hours are shown in the dropdown
+                        const validPresets = buildTimePresets(minTime, maxTime);
 
                         return (
                             <div
@@ -112,12 +183,15 @@ export function ScheduleForm({
                                             label="Opening"
                                             size="sm"
                                             disabled={isOffDay}
+                                            min={minTime}
+                                            max={maxTime}
+                                            presets={validPresets.length ? validPresets : undefined}
                                             className="w-[48%] sm:w-36"
                                             value={form.values.schedule[index].startTime ?? ''}
                                             onChange={(value) =>
                                                 form.setFieldValue(
                                                     `schedule.${index}.startTime`,
-                                                    value
+                                                    clampTime(value, minTime, maxTime)
                                                 )
                                             }
                                             error={form.errors[`schedule.${index}.startTime`]}
@@ -127,12 +201,15 @@ export function ScheduleForm({
                                             label="Closing"
                                             size="sm"
                                             disabled={isOffDay}
+                                            min={minTime}
+                                            max={maxTime}
+                                            presets={validPresets.length ? validPresets : undefined}
                                             className="w-[48%] sm:w-36"
                                             value={form.values.schedule[index].endTime ?? ''}
                                             onChange={(value) =>
                                                 form.setFieldValue(
                                                     `schedule.${index}.endTime`,
-                                                    value
+                                                    clampTime(value, minTime, maxTime)
                                                 )
                                             }
                                             error={form.errors[`schedule.${index}.endTime`]}
