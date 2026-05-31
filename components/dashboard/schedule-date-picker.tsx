@@ -14,8 +14,22 @@ import dayjs from 'dayjs';
  * Accepts all standard DatePickerInput props — any consumer-supplied
  * `excludeDate` or `getDayProps` are merged with the schedule logic.
  */
-export default function ScheduleDatePicker(props: DatePickerInputProps) {
-    const { excludeDate: externalExclude, getDayProps: externalGetDayProps, ...rest } = props;
+interface ScheduleDatePickerProps extends DatePickerInputProps {
+    /**
+     * Additional JS weekday indices (0=Sun … 6=Sat) to disable in the calendar.
+     * Use this to disable a staff member's personal off-days on top of the
+     * business schedule off-days that are already fetched internally.
+     */
+    excludeDayOfWeek?: Set<number>;
+}
+
+export default function ScheduleDatePicker(props: ScheduleDatePickerProps) {
+    const {
+        excludeDate: externalExclude,
+        getDayProps: externalGetDayProps,
+        excludeDayOfWeek,
+        ...rest
+    } = props;
 
     const { data: scheduleRes } = useGetScheduleQuery();
     // Map day names to JS Date.getDay() values (0=Sun, 1=Mon, ..., 6=Sat)
@@ -44,8 +58,11 @@ export default function ScheduleDatePicker(props: DatePickerInputProps) {
     }, [scheduleRes]);
 
     const isOffDay = useCallback(
-        (date: string) => offDayIndices.has(dayjs(date).day()),
-        [offDayIndices]
+        (date: string) => {
+            const dayIndex = dayjs(date).day();
+            return offDayIndices.has(dayIndex) || (excludeDayOfWeek?.has(dayIndex) ?? false);
+        },
+        [offDayIndices, excludeDayOfWeek]
     );
 
     // Merge with any external excludeDate the consumer passes

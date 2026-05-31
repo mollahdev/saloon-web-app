@@ -29,6 +29,11 @@ interface TimeOffSectionProps {
     onClose: () => void;
     onSubmit: (entry: TimeOffData) => void;
     onDelete: (entry: TimeOffData) => void;
+    /**
+     * JS weekday indices (0=Sun…6=Sat) to disable in the date picker.
+     * Pass the combined set of business + staff off-day indices.
+     */
+    excludeDayOfWeek?: Set<number>;
 }
 
 const typeConfig: Record<
@@ -130,6 +135,7 @@ export default function TimeOffSection({
     onClose,
     onSubmit,
     onDelete,
+    excludeDayOfWeek,
 }: TimeOffSectionProps) {
     return (
         <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100">
@@ -236,6 +242,7 @@ export default function TimeOffSection({
                 onClose={onClose}
                 onSubmit={onSubmit}
                 editingEntry={editingEntry}
+                excludeDayOfWeek={excludeDayOfWeek}
             />
         </div>
     );

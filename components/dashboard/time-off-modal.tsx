@@ -87,6 +87,11 @@ interface TimeOffModalProps {
     onClose: () => void;
     onSubmit: (entry: TimeOffData) => void;
     editingEntry?: TimeOffData | null;
+    /**
+     * JS weekday indices (0=Sun…6=Sat) that should be disabled in the date
+     * picker. Pass combined business + staff off-days here.
+     */
+    excludeDayOfWeek?: Set<number>;
 }
 
 function getInitialType(entry?: TimeOffData | null): 'SINGLE' | 'RECURRING' {
@@ -182,6 +187,7 @@ export default function TimeOffModal({
     onClose,
     onSubmit,
     editingEntry,
+    excludeDayOfWeek,
 }: TimeOffModalProps) {
     const [selectedType, setSelectedType] = useState<'SINGLE' | 'RECURRING'>(() =>
         getInitialType(editingEntry)
@@ -359,6 +365,7 @@ export default function TimeOffModal({
                                     }
                                     error={form.errors.startDate}
                                     minDate={new Date()}
+                                    excludeDayOfWeek={excludeDayOfWeek}
                                     styles={{ label: labelStyles }}
                                 />
 
@@ -386,6 +393,7 @@ export default function TimeOffModal({
                                     }
                                     disabled={!form.values.startDate}
                                     clearable
+                                    excludeDayOfWeek={excludeDayOfWeek}
                                     styles={{ label: labelStyles }}
                                 />
                             </Group>

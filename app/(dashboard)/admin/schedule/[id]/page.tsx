@@ -24,6 +24,17 @@ import TimeOffSection, { TimeOffData } from '@/components/dashboard/time-off-sec
 import { SchedulePageHeader } from '@/components/dashboard/schedule/schedule-page-header';
 import { ScheduleForm } from '@/components/dashboard/schedule/schedule-form';
 
+/** Map day-name strings ("MONDAY" etc.) to JS Date.getDay() indices (0=Sun…6=Sat) */
+const JS_DAY_MAP: Record<string, number> = {
+    SUNDAY: 0,
+    MONDAY: 1,
+    TUESDAY: 2,
+    WEDNESDAY: 3,
+    THURSDAY: 4,
+    FRIDAY: 5,
+    SATURDAY: 6,
+};
+
 export default function StaffSchedulePage() {
     const { id } = useParams<{ id: string }>();
     const [activeTab, setActiveTab] = useState<'schedule' | 'timeoff'>('schedule');
@@ -37,6 +48,29 @@ export default function StaffSchedulePage() {
     const staff = response?.data?.staff;
 
     const businessSchedule = businessScheduleRes?.data?.schedule;
+
+    /**
+     * Combined set of JS weekday indices that should be disabled in the
+     * date picker: business off-days UNION staff's personal off-days.
+     */
+    const excludeDayOfWeek = useMemo(() => {
+        const indices = new Set<number>();
+        // Business-level off-days (global)
+        businessSchedule?.forEach((d) => {
+            if (d.isOffDay) {
+                const idx = JS_DAY_MAP[d.dayOfWeek];
+                if (idx !== undefined) indices.add(idx);
+            }
+        });
+        // Staff-level off-days (individual)
+        response?.data?.schedule?.forEach((d: any) => {
+            if (d.isOffDay) {
+                const idx = JS_DAY_MAP[d.dayOfWeek];
+                if (idx !== undefined) indices.add(idx);
+            }
+        });
+        return indices;
+    }, [businessSchedule, response?.data?.schedule]);
 
     // Time off modal state — managed here, passed down to TimeOffSection
     const [opened, { open, close }] = useDisclosure(false);
@@ -186,6 +220,7 @@ export default function StaffSchedulePage() {
                     onClose={close}
                     onSubmit={handleModalSubmit}
                     onDelete={handleDelete}
+                    excludeDayOfWeek={excludeDayOfWeek}
                 />
             )}
         </div>
