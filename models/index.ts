@@ -8,3 +8,6 @@ export interface KnownError {
     description: string;
     code: number | undefined;
 }
+
+export * from './service';
+export * from './profile';
