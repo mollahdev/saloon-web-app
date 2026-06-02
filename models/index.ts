@@ -11,3 +11,4 @@ export interface KnownError {
 
 export * from './service';
 export * from './profile';
+export * from './coupon';

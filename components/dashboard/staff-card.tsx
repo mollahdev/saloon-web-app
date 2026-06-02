@@ -13,7 +13,6 @@ import {
 } from '@mantine/core';
 import { HiOutlineTrash } from 'react-icons/hi';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Profile } from '@/models/profile';
 import { ROLE, STATUS } from '@/constants';
 import { useConfirmation } from '@/hooks/use-confirmation';
@@ -41,15 +40,6 @@ const statusColors: Record<string, string> = {
 export function StaffCard({ staff, onEdit }: StaffCardProps) {
     const { confirm } = useConfirmation();
     const [deleteStaff] = useDeleteStaffMutation();
-    const router = useRouter();
-
-    const handleEditClick = () => {
-        if (staff.status === STATUS.PENDING_VERIFICATION) {
-            onEdit(staff);
-        } else {
-            router.push(`/admin/staffs/${staff.id}`);
-        }
-    };
 
     const handleDeleteClick = () => {
         confirm({
@@ -123,16 +113,30 @@ export function StaffCard({ staff, onEdit }: StaffCardProps) {
             <Divider my="md" variant="dashed" className="opacity-60" />
 
             <div className="flex flex-row items-center gap-1.5 w-full">
-                <Button
-                    variant="light"
-                    color="blue"
-                    size="sm"
-                    px={12}
-                    className="flex-initial h-9 transition-all hover:bg-blue-100 font-bold text-[13px]"
-                    onClick={handleEditClick}
-                >
-                    Edit
-                </Button>
+                {staff.status === STATUS.PENDING_VERIFICATION ? (
+                    <Button
+                        variant="light"
+                        color="blue"
+                        size="sm"
+                        px={12}
+                        className="flex-initial h-9 transition-all hover:bg-blue-100 font-bold text-[13px]"
+                        onClick={() => onEdit(staff)}
+                    >
+                        Edit
+                    </Button>
+                ) : (
+                    <Link href={`/admin/staffs/${staff.id}`} className="flex-initial">
+                        <Button
+                            variant="light"
+                            color="blue"
+                            size="sm"
+                            px={12}
+                            className="h-9 transition-all hover:bg-blue-100 font-bold text-[13px]"
+                        >
+                            Edit
+                        </Button>
+                    </Link>
+                )}
 
                 {staff.status === STATUS.PENDING_VERIFICATION ? (
                     <Button
