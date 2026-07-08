@@ -96,7 +96,7 @@ export default function StaffDetailPage() {
 
             const result = await response.json();
             form.setFieldValue('avatar', result.data.url);
-            toast.success('Avatar uploaded successfully');
+            // toast.success('Avatar uploaded successfully');
         } catch (error: any) {
             toast.error(error.message || 'Failed to upload avatar');
         } finally {

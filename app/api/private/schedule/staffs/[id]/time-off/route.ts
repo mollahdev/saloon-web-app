@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { STATUS } from '@/constants';
-import { isAdminOrOwner } from '@/app/lib/permissions';
+import { isAdminOrOwner, isActiveStatus } from '@/app/lib/permissions';
 import { timeOffSchema } from '@/app/lib/validation/time-off';
 
 /**
@@ -18,7 +18,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             select: { status: true, role: true },
         });
 
-        if (!user || user.status !== STATUS.ACTIVE) {
+        if (!user || !isActiveStatus(user)) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 
