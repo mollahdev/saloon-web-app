@@ -15,13 +15,16 @@ import { Service } from '@/models/service';
 import { useConfirmation } from '@/hooks/use-confirmation';
 import { useDeleteServiceMutation } from '@/app/lib/store/services/api';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
+
+const DEFAULT_SALOON_IMAGE =
+    'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=500&auto=format&fit=crop&q=60';
 
 interface ServiceCardProps {
     service: Service;
-    onEdit: (service: Service) => void;
 }
 
-export function ServiceCard({ service, onEdit }: ServiceCardProps) {
+export function ServiceCard({ service }: ServiceCardProps) {
     const { confirm } = useConfirmation();
     const [deleteService] = useDeleteServiceMutation();
 
@@ -46,12 +49,19 @@ export function ServiceCard({ service, onEdit }: ServiceCardProps) {
         <Card
             padding="xl"
             radius="md"
-            className="relative transition-all duration-200 border border-gray-100 overflow-hidden hover:-translate-y-1 hover:shadow-lg bg-white group flex flex-col h-full justify-between"
+            className={`relative transition-all duration-200 border border-gray-100 overflow-hidden hover:-translate-y-1 hover:shadow-lg bg-white group flex flex-col h-full justify-between ${
+                service.status === 'INACTIVE' ? 'opacity-80 hover:opacity-100' : ''
+            }`}
         >
-            {/* Top Gradient Border */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-600 to-indigo-500" />
+            <Card.Section className="h-44 overflow-hidden relative">
+                <img
+                    src={service.image || DEFAULT_SALOON_IMAGE}
+                    alt={service.name}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+            </Card.Section>
 
-            <Stack gap="sm" className="relative z-10 flex-grow">
+            <Stack gap="sm" className="relative z-10 flex-grow mt-4">
                 <div>
                     <Group justify="space-between" align="flex-start" wrap="nowrap">
                         <Text className="text-lg font-bold text-gray-800 tracking-tight leading-snug">
@@ -77,6 +87,14 @@ export function ServiceCard({ service, onEdit }: ServiceCardProps) {
                     >
                         {service.duration} mins
                     </Badge>
+                    <Badge
+                        color={service.status === 'ACTIVE' ? 'teal' : 'orange'}
+                        variant="light"
+                        size="md"
+                        className="font-semibold px-2.5 py-3 h-auto"
+                    >
+                        {service.status === 'ACTIVE' ? 'Active' : 'Inactive'}
+                    </Badge>
                 </Group>
             </Stack>
 
@@ -84,12 +102,13 @@ export function ServiceCard({ service, onEdit }: ServiceCardProps) {
 
             <div className="flex flex-row items-center gap-1.5 w-full mt-auto">
                 <Button
+                    component={Link}
+                    href={`/admin/services/${service.id}`}
                     variant="light"
                     color="blue"
                     size="sm"
                     fullWidth
                     className="h-9 transition-all hover:bg-blue-100 font-bold text-[13px]"
-                    onClick={() => onEdit(service)}
                 >
                     Edit Service
                 </Button>

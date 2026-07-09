@@ -8,6 +8,8 @@ export const serviceSchema = z.object({
         .number({ message: 'Duration is required' })
         .int('Duration must be a whole number')
         .positive('Duration must be greater than 0'),
+    image: z.string().url('Invalid image URL').optional().nullable().or(z.literal('')),
+    status: z.enum(['ACTIVE', 'INACTIVE']).optional().default('ACTIVE'),
 });
 
 export type ServiceValues = z.infer<typeof serviceSchema>;

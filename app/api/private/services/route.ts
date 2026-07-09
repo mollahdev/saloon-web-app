@@ -37,6 +37,7 @@ export async function GET(request: Request) {
                         'A standard professional haircut tailored to your preferences, including a quick wash and styling.',
                     price: 30.0,
                     duration: 30,
+                    image: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=500&auto=format&fit=crop&q=60',
                 },
                 {
                     name: 'Beard Trim & Shaping',
@@ -44,6 +45,7 @@ export async function GET(request: Request) {
                         'Keep your beard looking clean and sharp. Includes precision trimming, shaping, and beard oil application.',
                     price: 20.0,
                     duration: 20,
+                    image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=500&auto=format&fit=crop&q=60',
                 },
                 {
                     name: 'Hot Towel Shave',
@@ -51,6 +53,7 @@ export async function GET(request: Request) {
                         'Traditional straight razor shave with hot towels, pre-shave cream, warm lather, and soothing aftershave lotion.',
                     price: 35.0,
                     duration: 45,
+                    image: 'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=500&auto=format&fit=crop&q=60',
                 },
                 {
                     name: 'Hair Color & Styling',
@@ -58,6 +61,7 @@ export async function GET(request: Request) {
                         'Professional hair coloring service followed by a wash, conditioning treatment, and custom blowout styling.',
                     price: 75.0,
                     duration: 90,
+                    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=500&auto=format&fit=crop&q=60',
                 },
                 {
                     name: 'Scalp Treatment & Massage',
@@ -65,6 +69,7 @@ export async function GET(request: Request) {
                         'Deep cleansing and exfoliating treatment for the scalp, paired with a relaxing 15-minute head massage.',
                     price: 25.0,
                     duration: 30,
+                    image: 'https://images.unsplash.com/photo-1517832606589-7a598b647192?w=500&auto=format&fit=crop&q=60',
                 },
             ];
 
@@ -128,6 +133,8 @@ export async function POST(request: Request) {
                 description: val.data.description || null,
                 price: val.data.price,
                 duration: val.data.duration,
+                image: val.data.image || null,
+                status: val.data.status || 'ACTIVE',
             },
         });
 

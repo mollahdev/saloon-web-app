@@ -81,6 +81,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
                 description: val.data.description || null,
                 price: val.data.price,
                 duration: val.data.duration,
+                image: val.data.image || null,
+                status: val.data.status,
             },
         });
 

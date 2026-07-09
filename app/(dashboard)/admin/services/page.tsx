@@ -1,31 +1,16 @@
 'use client';
-import { useState } from 'react';
 import { SimpleGrid, Button } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 import { size } from 'lodash';
 import { PageTitle } from '@/utils/portal';
 import { useGetServicesQuery } from '@/app/lib/store/services/api';
 import { ServiceCard } from '@/components/dashboard/service-card';
-import CreateServiceModal from '@/components/dashboard/create-service-modal';
 import ServicesLoading from './loading';
 import ServicesEmpty from './empty';
-import { Service } from '@/models/service';
+import Link from 'next/link';
 
 export default function ServicesPage() {
     const { data: response, isLoading, error } = useGetServicesQuery();
     const services = response?.data || [];
-    const [opened, { open, close }] = useDisclosure(false);
-    const [selectedService, setSelectedService] = useState<Service | null>(null);
-
-    const handleEditClick = (service: Service) => {
-        setSelectedService(service);
-        open();
-    };
-
-    const handleClose = () => {
-        setSelectedService(null);
-        close();
-    };
 
     if (isLoading) {
         return (
@@ -60,11 +45,9 @@ export default function ServicesPage() {
                         </p>
                     </div>
                     <Button
+                        component={Link}
+                        href="/admin/services/new"
                         id="create-service-btn"
-                        onClick={() => {
-                            setSelectedService(null);
-                            open();
-                        }}
                         size="md"
                     >
                         Add New Service
@@ -73,12 +56,7 @@ export default function ServicesPage() {
             )}
 
             {size(services) === 0 ? (
-                <ServicesEmpty
-                    onCreateClick={() => {
-                        setSelectedService(null);
-                        open();
-                    }}
-                />
+                <ServicesEmpty />
             ) : (
                 <SimpleGrid
                     cols={{ base: 1, sm: 2, lg: 3, xl: 4 }}
@@ -86,12 +64,10 @@ export default function ServicesPage() {
                     verticalSpacing="lg"
                 >
                     {services.map((service) => (
-                        <ServiceCard key={service.id} service={service} onEdit={handleEditClick} />
+                        <ServiceCard key={service.id} service={service} />
                     ))}
                 </SimpleGrid>
             )}
-
-            <CreateServiceModal opened={opened} onClose={handleClose} service={selectedService} />
         </div>
     );
 }

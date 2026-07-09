@@ -1,14 +1,10 @@
-'use client';
 import { Button } from '@mantine/core';
 import { HiOutlinePlus, HiOutlineClock } from 'react-icons/hi';
 import { LuScissors } from 'react-icons/lu';
 import { RiCoupon2Line } from 'react-icons/ri';
+import Link from 'next/link';
 
-interface ServicesEmptyProps {
-    onCreateClick: () => void;
-}
-
-export default function ServicesEmpty({ onCreateClick }: ServicesEmptyProps) {
+export default function ServicesEmpty() {
     return (
         <div className="relative max-w-3xl mx-auto my-6 bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden p-8 md:p-12 text-center flex flex-col items-center">
             {/* Glowing background blur */}
@@ -50,8 +46,9 @@ export default function ServicesEmpty({ onCreateClick }: ServicesEmptyProps) {
 
             {/* Action Button */}
             <Button
+                component={Link}
+                href="/admin/services/new"
                 id="add-first-service-btn"
-                onClick={onCreateClick}
                 size="md"
                 radius="md"
                 leftSection={<HiOutlinePlus size={18} />}
