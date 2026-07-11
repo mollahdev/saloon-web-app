@@ -10,6 +10,41 @@ export const serviceSchema = z.object({
         .positive('Duration must be greater than 0'),
     image: z.string().url('Invalid image URL').optional().nullable().or(z.literal('')),
     status: z.enum(['ACTIVE', 'INACTIVE']).optional().default('ACTIVE'),
+    enableCoupons: z.boolean().optional().default(false),
+    coupons: z
+        .array(
+            z.object({
+                couponId: z.string().uuid('Invalid coupon ID'),
+                amount: z
+                    .number({ message: 'Amount is required' })
+                    .positive('Amount must be greater than 0'),
+            })
+        )
+        .optional()
+        .default([]),
+    pricingVariations: z
+        .array(
+            z.object({
+                staffId: z.string().uuid('Invalid staff ID'),
+                price: z
+                    .number({ message: 'Price is required' })
+                    .positive('Price must be greater than 0'),
+                enableCoupons: z.boolean().optional().default(false),
+                coupons: z
+                    .array(
+                        z.object({
+                            couponId: z.string().uuid('Invalid coupon ID'),
+                            amount: z
+                                .number({ message: 'Amount is required' })
+                                .positive('Amount must be greater than 0'),
+                        })
+                    )
+                    .optional()
+                    .default([]),
+            })
+        )
+        .optional()
+        .default([]),
 });
 
 export type ServiceValues = z.infer<typeof serviceSchema>;

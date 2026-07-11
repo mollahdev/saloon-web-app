@@ -1,13 +1,58 @@
 model Service {
-  id          String   @id @default(uuid())
-  name        String   @db.VarChar(255)
-  description String?  @db.VarChar(1000)
-  price       Float    // Price of the service
-  duration    Int      // Duration in minutes
-  image       String?  @db.VarChar(500)
-  status      Status   @default(ACTIVE)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id                String           @id @default(uuid())
+  name              String           @db.VarChar(255)
+  description       String?          @db.VarChar(1000)
+  price             Float            // Price of the service
+  duration          Int              // Duration in minutes
+  image             String?          @db.VarChar(500)
+  status            Status           @default(ACTIVE)
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+  pricingVariations ServicePricing[]
+  serviceCoupons    ServiceCoupon[]
 
   @@map("services")
+}
+
+model ServicePricing {
+  id             String                 @id @default(uuid())
+  serviceId      String                 @map("service_id")
+  service        Service                @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  staffId        String                 @map("staff_id")
+  staff          User                   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  price          Float                  // Staff-specific price for this service
+  createdAt      DateTime               @default(now()) @map("created_at")
+  updatedAt      DateTime               @updatedAt @map("updated_at")
+  pricingCoupons ServicePricingCoupon[]
+
+  @@unique([serviceId, staffId])
+  @@map("service_pricings")
+}
+
+model ServiceCoupon {
+  id        String   @id @default(uuid())
+  serviceId String   @map("service_id")
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  couponId  String   @map("coupon_id")
+  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  amount    Float    // Custom discounted price or coupon value
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([serviceId, couponId])
+  @@map("service_coupons")
+}
+
+model ServicePricingCoupon {
+  id               String         @id @default(uuid())
+  servicePricingId String         @map("service_pricing_id")
+  servicePricing   ServicePricing @relation(fields: [servicePricingId], references: [id], onDelete: Cascade)
+  couponId         String         @map("coupon_id")
+  coupon           Coupon         @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  amount           Float          // Custom discounted price or coupon value
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+
+  @@unique([servicePricingId, couponId])
+  @@map("service_pricing_coupons")
 }

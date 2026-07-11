@@ -20,6 +20,29 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
         const service = await prisma.service.findUnique({
             where: { id },
+            include: {
+                serviceCoupons: {
+                    include: {
+                        coupon: true,
+                    },
+                },
+                pricingVariations: {
+                    include: {
+                        staff: {
+                            select: {
+                                id: true,
+                                name: true,
+                                avatar: true,
+                            },
+                        },
+                        pricingCoupons: {
+                            include: {
+                                coupon: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
 
         if (!service) {
@@ -74,16 +97,73 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ message: 'Service not found' }, { status: 404 });
         }
 
-        const updatedService = await prisma.service.update({
-            where: { id },
-            data: {
-                name: val.data.name,
-                description: val.data.description || null,
-                price: val.data.price,
-                duration: val.data.duration,
-                image: val.data.image || null,
-                status: val.data.status,
-            },
+        const updatedService = await prisma.$transaction(async (tx) => {
+            // Delete existing pricing variations
+            await tx.servicePricing.deleteMany({
+                where: { serviceId: id },
+            });
+
+            // Delete existing service coupons
+            await tx.serviceCoupon.deleteMany({
+                where: { serviceId: id },
+            });
+
+            // Update service and create new pricing variations & coupons
+            return await tx.service.update({
+                where: { id },
+                data: {
+                    name: val.data.name,
+                    description: val.data.description || null,
+                    price: val.data.price,
+                    duration: val.data.duration,
+                    image: val.data.image || null,
+                    status: val.data.status,
+                    serviceCoupons: {
+                        create:
+                            val.data.coupons?.map((c) => ({
+                                couponId: c.couponId,
+                                amount: c.amount,
+                            })) || [],
+                    },
+                    pricingVariations: {
+                        create:
+                            val.data.pricingVariations?.map((p) => ({
+                                staffId: p.staffId,
+                                price: p.price,
+                                pricingCoupons: {
+                                    create:
+                                        p.coupons?.map((c) => ({
+                                            couponId: c.couponId,
+                                            amount: c.amount,
+                                        })) || [],
+                                },
+                            })) || [],
+                    },
+                },
+                include: {
+                    serviceCoupons: {
+                        include: {
+                            coupon: true,
+                        },
+                    },
+                    pricingVariations: {
+                        include: {
+                            staff: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    avatar: true,
+                                },
+                            },
+                            pricingCoupons: {
+                                include: {
+                                    coupon: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
         });
 
         return NextResponse.json({

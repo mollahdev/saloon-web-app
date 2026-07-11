@@ -16,5 +16,6 @@ model User {
   skills       Skill[]
   staffWeeklyHours StaffWeeklyHour[]
   timeOffs     StaffTimeOff[]
+  servicePricings ServicePricing[]
   @@map("users")
 }
