@@ -17,8 +17,7 @@ import { useDeleteServiceMutation } from '@/app/lib/store/services/api';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 
-const DEFAULT_SALOON_IMAGE =
-    'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=500&auto=format&fit=crop&q=60';
+const DEFAULT_SALOON_IMAGE = '/placeholder.svg';
 
 interface ServiceCardProps {
     service: Service;
@@ -49,7 +48,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
         <Card
             padding="xl"
             radius="md"
-            className={`relative transition-all duration-200 border border-gray-100 overflow-hidden hover:-translate-y-1 hover:shadow-lg bg-white group flex flex-col h-full justify-between ${
+            className={`relative transition-all duration-200 border border-gray-100 overflow-hidden bg-white group flex flex-col h-full justify-between ${
                 service.status === 'INACTIVE' ? 'opacity-80 hover:opacity-100' : ''
             }`}
         >
@@ -57,7 +56,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
                 <img
                     src={service.image || DEFAULT_SALOON_IMAGE}
                     alt={service.name}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-300"
                 />
             </Card.Section>
 

@@ -1,7 +1,6 @@
 enum CouponDiscountType {
   PERCENTAGE
-  FIXED_CART
-  FIXED_SERVICE
+  FIXED
 }
 
 enum CouponStatus {
@@ -14,16 +13,9 @@ model Coupon {
   code            String             @unique @db.VarChar(50)
   description     String?            @db.VarChar(1000)
   discountType    CouponDiscountType @map("discount_type")
-  amount          Float
-  expiryDate      DateTime?          @map("expiry_date")
   usageLimit      Int?               @map("usage_limit")
   usageCount      Int                @default(0) @map("usage_count")
   minimumSpend    Float?             @map("minimum_spend")
-  maximumSpend    Float?             @map("maximum_spend")
-  services        Service[]          @relation("CouponServices")
-  excludeServices Service[]          @relation("CouponExcludeServices")
-  staffs          User[]             @relation("CouponStaffs")
-  excludeStaffs   User[]             @relation("CouponExcludeStaffs")
   status          CouponStatus       @default(ACTIVE)
   createdAt       DateTime           @default(now()) @map("created_at")
   updatedAt       DateTime           @updatedAt @map("updated_at")

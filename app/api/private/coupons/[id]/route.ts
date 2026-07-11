@@ -20,12 +20,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
         const coupon = await prisma.coupon.findUnique({
             where: { id },
-            include: {
-                services: true,
-                excludeServices: true,
-                staffs: true,
-                excludeStaffs: true,
-            },
         });
 
         if (!coupon) {
@@ -104,23 +98,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             );
         }
 
-        const {
-            code,
-            description,
-            discountType,
-            amount,
-            expiryDate,
-            usageLimit,
-            minimumSpend,
-            maximumSpend,
-            services,
-            excludeServices,
-            staffs,
-            excludeStaffs,
-            status,
-        } = val.data;
-
-        const parsedExpiry = expiryDate ? new Date(expiryDate) : null;
+        const { code, description, discountType, usageLimit, minimumSpend, status } = val.data;
 
         const updatedCoupon = await prisma.coupon.update({
             where: { id },
@@ -128,30 +106,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
                 code,
                 description: description || null,
                 discountType,
-                amount,
-                expiryDate: parsedExpiry,
                 usageLimit: usageLimit ?? null,
                 minimumSpend: minimumSpend ?? null,
-                maximumSpend: maximumSpend ?? null,
                 status,
-                services: {
-                    set: services ? services.map((id) => ({ id })) : [],
-                },
-                excludeServices: {
-                    set: excludeServices ? excludeServices.map((id) => ({ id })) : [],
-                },
-                staffs: {
-                    set: staffs ? staffs.map((id) => ({ id })) : [],
-                },
-                excludeStaffs: {
-                    set: excludeStaffs ? excludeStaffs.map((id) => ({ id })) : [],
-                },
-            },
-            include: {
-                services: true,
-                excludeServices: true,
-                staffs: true,
-                excludeStaffs: true,
             },
         });
 

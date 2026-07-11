@@ -8,7 +8,6 @@ import { PageTitle } from '@/utils/portal';
 import { useCreateCouponMutation } from '@/app/lib/store/coupons/api';
 import CouponForm from '@/components/dashboard/coupon-form';
 import { CouponValues } from '@/app/lib/validation/coupon';
-import dayjs from 'dayjs';
 
 export default function CreateCouponPage() {
     const router = useRouter();
@@ -20,12 +19,8 @@ export default function CreateCouponPage() {
             const payload = {
                 ...values,
                 code: values.code.trim().toUpperCase(),
-                expiryDate: values.expiryDate
-                    ? dayjs(values.expiryDate).format('YYYY-MM-DD')
-                    : null,
                 usageLimit: values.usageLimit || null,
                 minimumSpend: values.minimumSpend || null,
-                maximumSpend: values.maximumSpend || null,
             };
 
             const response = await createCoupon(payload).unwrap();

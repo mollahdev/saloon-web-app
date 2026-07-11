@@ -23,12 +23,6 @@ export async function GET(request: Request) {
 
         // Fetch coupons from the database
         const dbCoupons = await prisma.coupon.findMany({
-            include: {
-                services: true,
-                excludeServices: true,
-                staffs: true,
-                excludeStaffs: true,
-            },
             orderBy: {
                 createdAt: 'desc',
             },
@@ -83,21 +77,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const {
-            code,
-            description,
-            discountType,
-            amount,
-            expiryDate,
-            usageLimit,
-            minimumSpend,
-            maximumSpend,
-            services,
-            excludeServices,
-            staffs,
-            excludeStaffs,
-            status,
-        } = val.data;
+        const { code, description, discountType, usageLimit, minimumSpend, status } = val.data;
 
         // Check if duplicate code exists
         const existingCoupon = await prisma.coupon.findUnique({
@@ -114,49 +94,14 @@ export async function POST(request: Request) {
             );
         }
 
-        const parsedExpiry = expiryDate ? new Date(expiryDate) : null;
-
         const newCoupon = await prisma.coupon.create({
             data: {
                 code,
                 description: description || null,
                 discountType,
-                amount,
-                expiryDate: parsedExpiry,
                 usageLimit: usageLimit ?? null,
                 minimumSpend: minimumSpend ?? null,
-                maximumSpend: maximumSpend ?? null,
                 status,
-                services:
-                    services && services.length > 0
-                        ? {
-                              connect: services.map((id) => ({ id })),
-                          }
-                        : undefined,
-                excludeServices:
-                    excludeServices && excludeServices.length > 0
-                        ? {
-                              connect: excludeServices.map((id) => ({ id })),
-                          }
-                        : undefined,
-                staffs:
-                    staffs && staffs.length > 0
-                        ? {
-                              connect: staffs.map((id) => ({ id })),
-                          }
-                        : undefined,
-                excludeStaffs:
-                    excludeStaffs && excludeStaffs.length > 0
-                        ? {
-                              connect: excludeStaffs.map((id) => ({ id })),
-                          }
-                        : undefined,
-            },
-            include: {
-                services: true,
-                excludeServices: true,
-                staffs: true,
-                excludeStaffs: true,
             },
         });
 

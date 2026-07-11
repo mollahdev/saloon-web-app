@@ -16,8 +16,5 @@ model User {
   skills       Skill[]
   staffWeeklyHours StaffWeeklyHour[]
   timeOffs     StaffTimeOff[]
-  coupons        Coupon[] @relation("CouponStaffs")
-  excludeCoupons Coupon[] @relation("CouponExcludeStaffs")
-
   @@map("users")
 }

@@ -9,7 +9,6 @@ import { useGetCouponQuery, useUpdateCouponMutation } from '@/app/lib/store/coup
 import CouponForm from '@/components/dashboard/coupon-form';
 import { CouponValues } from '@/app/lib/validation/coupon';
 import CouponDetailLoading from './loading';
-import dayjs from 'dayjs';
 
 export default function EditCouponPage() {
     const params = useParams();
@@ -26,12 +25,8 @@ export default function EditCouponPage() {
             const payload = {
                 ...values,
                 code: values.code.trim().toUpperCase(),
-                expiryDate: values.expiryDate
-                    ? dayjs(values.expiryDate).format('YYYY-MM-DD')
-                    : null,
                 usageLimit: values.usageLimit || null,
                 minimumSpend: values.minimumSpend || null,
-                maximumSpend: values.maximumSpend || null,
             };
 
             const response = await updateCoupon({ id, body: payload }).unwrap();
