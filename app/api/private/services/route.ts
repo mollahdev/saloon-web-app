@@ -26,6 +26,29 @@ export async function GET(request: Request) {
             orderBy: {
                 createdAt: 'desc',
             },
+            include: {
+                serviceCoupons: {
+                    include: {
+                        coupon: true,
+                    },
+                },
+                pricingVariations: {
+                    include: {
+                        staff: {
+                            select: {
+                                id: true,
+                                name: true,
+                                avatar: true,
+                            },
+                        },
+                        pricingCoupons: {
+                            include: {
+                                coupon: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
 
         // Auto-seed with dummy services if empty
@@ -81,6 +104,29 @@ export async function GET(request: Request) {
                 orderBy: {
                     createdAt: 'desc',
                 },
+                include: {
+                    serviceCoupons: {
+                        include: {
+                            coupon: true,
+                        },
+                    },
+                    pricingVariations: {
+                        include: {
+                            staff: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    avatar: true,
+                                },
+                            },
+                            pricingCoupons: {
+                                include: {
+                                    coupon: true,
+                                },
+                            },
+                        },
+                    },
+                },
             });
         }
 
@@ -135,6 +181,50 @@ export async function POST(request: Request) {
                 duration: val.data.duration,
                 image: val.data.image || null,
                 status: val.data.status || 'ACTIVE',
+                serviceCoupons: {
+                    create:
+                        val.data.coupons?.map((c) => ({
+                            couponId: c.couponId,
+                            amount: c.amount,
+                        })) || [],
+                },
+                pricingVariations: {
+                    create:
+                        val.data.pricingVariations?.map((p) => ({
+                            staffId: p.staffId,
+                            price: p.price,
+                            pricingCoupons: {
+                                create:
+                                    p.coupons?.map((c) => ({
+                                        couponId: c.couponId,
+                                        amount: c.amount,
+                                    })) || [],
+                            },
+                        })) || [],
+                },
+            },
+            include: {
+                serviceCoupons: {
+                    include: {
+                        coupon: true,
+                    },
+                },
+                pricingVariations: {
+                    include: {
+                        staff: {
+                            select: {
+                                id: true,
+                                name: true,
+                                avatar: true,
+                            },
+                        },
+                        pricingCoupons: {
+                            include: {
+                                coupon: true,
+                            },
+                        },
+                    },
+                },
             },
         });
 

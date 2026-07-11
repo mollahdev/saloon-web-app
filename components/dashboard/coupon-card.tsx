@@ -99,7 +99,7 @@ export function CouponCard({ coupon }: CouponCardProps) {
                     {/* Spend Thresholds */}
                     {coupon.minimumSpend ? (
                         <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-gray-500 font-semibold uppercase">
-                            <span>Min: ${coupon.minimumSpend.toFixed(2)}</span>
+                            <span>Min: ${Math.round(coupon.minimumSpend)}</span>
                         </div>
                     ) : null}
 

@@ -177,8 +177,7 @@ export default function CouponForm({
                                     label="Min Spend ($)"
                                     placeholder="No minimum spend"
                                     min={0}
-                                    decimalScale={2}
-                                    fixedDecimalScale
+                                    allowDecimal={false}
                                     hideControls
                                     {...form.getInputProps('minimumSpend')}
                                     styles={{ label: labelStyles }}

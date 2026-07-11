@@ -19,6 +19,8 @@ model Coupon {
   status          CouponStatus       @default(ACTIVE)
   createdAt       DateTime           @default(now()) @map("created_at")
   updatedAt       DateTime           @updatedAt @map("updated_at")
+  serviceCoupons  ServiceCoupon[]
+  servicePricingCoupons ServicePricingCoupon[]
 
   @@map("coupons")
 }

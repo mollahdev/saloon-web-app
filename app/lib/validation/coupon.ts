@@ -13,7 +13,7 @@ export const couponSchema = z.object({
     description: z.string().max(1000).optional().nullable().or(z.literal('')),
     discountType: z.nativeEnum(CouponDiscountType),
     usageLimit: z.number().int().positive().optional().nullable(),
-    minimumSpend: z.number().nonnegative().optional().nullable(),
+    minimumSpend: z.number().int().nonnegative().optional().nullable(),
     status: z.nativeEnum(CouponStatus).default(CouponStatus.ACTIVE),
 });
 

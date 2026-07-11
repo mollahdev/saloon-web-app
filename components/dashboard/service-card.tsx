@@ -67,7 +67,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
                             {service.name}
                         </Text>
                         <Text className="text-lg font-extrabold text-indigo-600 shrink-0">
-                            ${service.price.toFixed(2)}
+                            ${Math.round(service.price)}
                         </Text>
                     </Group>
                 </div>
