@@ -56,7 +56,7 @@ export default function EditServicePage() {
     const service = serviceResponse?.data;
 
     const { data: staffsResponse } = useGetStaffsQuery();
-    const allStaffs = staffsResponse?.data || [];
+    const allStaffs = (staffsResponse?.data || []).filter((s) => s.status === 'ACTIVE');
 
     const { data: couponsResponse } = useGetCouponsQuery();
     const activeCoupons = (couponsResponse?.data || []).filter((c) => c.status === 'ACTIVE');
@@ -712,176 +712,370 @@ export default function EditServicePage() {
                             </Card>
 
                             {/* Pricing Variations Card */}
-                            <Card withBorder radius="lg" className="bg-white p-6 shadow-sm">
-                                <Text fw={700} size="md" mb="md" className="text-gray-800">
-                                    Pricing Variations
-                                </Text>
-                                <Divider mb="lg" />
+                            {allStaffs.length > 0 && (
+                                <Card withBorder radius="lg" className="bg-white p-6 shadow-sm">
+                                    <Text fw={700} size="md" mb="md" className="text-gray-800">
+                                        Pricing Variations
+                                    </Text>
+                                    <Divider mb="lg" />
 
-                                <Stack gap="md">
-                                    {form.values.pricingVariations &&
-                                    form.values.pricingVariations.length > 0 ? (
-                                        <div className="flex flex-col gap-4">
-                                            {form.values.pricingVariations.map((item, index) => {
-                                                // Exclude already selected staffs in other rows
-                                                const selectedStaffIds =
-                                                    form.values.pricingVariations
-                                                        ?.map((v) => v.staffId)
-                                                        .filter((id) => id !== item.staffId) || [];
+                                    <Stack gap="md">
+                                        {form.values.pricingVariations &&
+                                        form.values.pricingVariations.length > 0 ? (
+                                            <div className="flex flex-col gap-4">
+                                                {form.values.pricingVariations.map(
+                                                    (item, index) => {
+                                                        // Exclude already selected staffs in other rows
+                                                        const selectedStaffIds =
+                                                            form.values.pricingVariations
+                                                                ?.map((v) => v.staffId)
+                                                                .filter(
+                                                                    (id) => id !== item.staffId
+                                                                ) || [];
 
-                                                const availableStaffs = allStaffs.filter(
-                                                    (staff) => !selectedStaffIds.includes(staff.id)
-                                                );
+                                                        const availableStaffs = allStaffs.filter(
+                                                            (staff) =>
+                                                                !selectedStaffIds.includes(staff.id)
+                                                        );
 
-                                                return (
-                                                    <div
-                                                        key={index}
-                                                        className="p-4 border border-gray-200 rounded-xl bg-gray-50/30 flex flex-col gap-4"
-                                                    >
-                                                        <Grid align="flex-end" gap="md">
-                                                            <Grid.Col span={{ base: 12, sm: 6 }}>
-                                                                <Select
-                                                                    id={`variation-staff-${index}`}
-                                                                    label="Staff Member"
-                                                                    placeholder="Select a staff member"
-                                                                    required
-                                                                    data={availableStaffs.map(
-                                                                        (staff) => ({
-                                                                            value: staff.id,
-                                                                            label: `${staff.name} (${staff.position || 'Stylist'})`,
-                                                                        })
-                                                                    )}
-                                                                    value={item.staffId}
-                                                                    onChange={(val) => {
-                                                                        if (val) {
-                                                                            form.setFieldValue(
-                                                                                `pricingVariations.${index}.staffId`,
-                                                                                val
-                                                                            );
-                                                                        }
-                                                                    }}
-                                                                    styles={{ label: labelStyles }}
-                                                                />
-                                                            </Grid.Col>
-                                                            <Grid.Col span={{ base: 9, sm: 4 }}>
-                                                                <NumberInput
-                                                                    id={`variation-price-${index}`}
-                                                                    label="Custom Price ($)"
-                                                                    placeholder="e.g. 50"
-                                                                    min={1}
-                                                                    allowDecimal={false}
-                                                                    hideControls
-                                                                    required
-                                                                    value={item.price}
-                                                                    onChange={(val) => {
-                                                                        form.setFieldValue(
-                                                                            `pricingVariations.${index}.price`,
-                                                                            typeof val === 'number'
-                                                                                ? val
-                                                                                : 0
-                                                                        );
-                                                                    }}
-                                                                    styles={{ label: labelStyles }}
-                                                                />
-                                                            </Grid.Col>
-                                                            <Grid.Col span={{ base: 3, sm: 2 }}>
-                                                                <Button
-                                                                    variant="light"
-                                                                    color="red"
-                                                                    fullWidth
-                                                                    onClick={() => {
-                                                                        const updated = [
-                                                                            ...(form.values
-                                                                                .pricingVariations ||
-                                                                                []),
-                                                                        ];
-                                                                        updated.splice(index, 1);
-                                                                        form.setFieldValue(
-                                                                            'pricingVariations',
-                                                                            updated
-                                                                        );
-                                                                    }}
-                                                                    className="h-[36px] flex items-center justify-center p-0"
-                                                                >
-                                                                    <HiOutlineTrash size={18} />
-                                                                </Button>
-                                                            </Grid.Col>
-                                                        </Grid>
-
-                                                        {/* Staff Specific Coupon Section */}
-                                                        {activeCoupons.length > 0 && (
-                                                            <div className="border-t border-gray-100 pt-3">
-                                                                <Switch
-                                                                    id={`variation-enable-coupons-${index}`}
-                                                                    label="Enable Coupons for this Staff"
-                                                                    size="sm"
-                                                                    mb="xs"
-                                                                    checked={item.enableCoupons}
-                                                                    onChange={(event) => {
-                                                                        const checked =
-                                                                            event.currentTarget
-                                                                                .checked;
-                                                                        form.setFieldValue(
-                                                                            `pricingVariations.${index}.enableCoupons`,
-                                                                            checked
-                                                                        );
-                                                                        if (
-                                                                            checked &&
-                                                                            (!item.coupons ||
-                                                                                item.coupons
-                                                                                    .length === 0)
-                                                                        ) {
-                                                                            const firstAvailable =
-                                                                                activeCoupons[0];
-                                                                            const nextCouponId =
-                                                                                firstAvailable
-                                                                                    ? firstAvailable.id
-                                                                                    : '';
-                                                                            form.setFieldValue(
-                                                                                `pricingVariations.${index}.coupons`,
-                                                                                [
-                                                                                    {
-                                                                                        couponId:
-                                                                                            nextCouponId,
-                                                                                        amount: 0,
-                                                                                    },
-                                                                                ]
-                                                                            );
-                                                                        }
-                                                                    }}
-                                                                />
-
-                                                                {item.enableCoupons && (
-                                                                    <Stack
-                                                                        gap="xs"
-                                                                        className="mt-2 pl-4 border-l-2 border-indigo-50"
+                                                        return (
+                                                            <div
+                                                                key={index}
+                                                                className="p-4 border border-gray-200 rounded-xl bg-gray-50/30 flex flex-col gap-4"
+                                                            >
+                                                                <Grid align="flex-end" gap="md">
+                                                                    <Grid.Col
+                                                                        span={{ base: 12, sm: 6 }}
                                                                     >
-                                                                        {item.coupons &&
-                                                                        item.coupons.length > 0 ? (
-                                                                            <div className="flex flex-col gap-2">
-                                                                                {item.coupons.map(
-                                                                                    (
-                                                                                        cItem,
-                                                                                        cIndex
-                                                                                    ) => {
+                                                                        <Select
+                                                                            id={`variation-staff-${index}`}
+                                                                            label="Staff Member"
+                                                                            placeholder="Select a staff member"
+                                                                            required
+                                                                            data={availableStaffs.map(
+                                                                                (staff) => ({
+                                                                                    value: staff.id,
+                                                                                    label: `${staff.name} (${staff.position || 'Stylist'})`,
+                                                                                })
+                                                                            )}
+                                                                            value={item.staffId}
+                                                                            onChange={(val) => {
+                                                                                if (val) {
+                                                                                    form.setFieldValue(
+                                                                                        `pricingVariations.${index}.staffId`,
+                                                                                        val
+                                                                                    );
+                                                                                }
+                                                                            }}
+                                                                            styles={{
+                                                                                label: labelStyles,
+                                                                            }}
+                                                                        />
+                                                                    </Grid.Col>
+                                                                    <Grid.Col
+                                                                        span={{ base: 9, sm: 4 }}
+                                                                    >
+                                                                        <NumberInput
+                                                                            id={`variation-price-${index}`}
+                                                                            label="Custom Price ($)"
+                                                                            placeholder="e.g. 50"
+                                                                            min={1}
+                                                                            allowDecimal={false}
+                                                                            hideControls
+                                                                            required
+                                                                            value={item.price}
+                                                                            onChange={(val) => {
+                                                                                form.setFieldValue(
+                                                                                    `pricingVariations.${index}.price`,
+                                                                                    typeof val ===
+                                                                                        'number'
+                                                                                        ? val
+                                                                                        : 0
+                                                                                );
+                                                                            }}
+                                                                            styles={{
+                                                                                label: labelStyles,
+                                                                            }}
+                                                                        />
+                                                                    </Grid.Col>
+                                                                    <Grid.Col
+                                                                        span={{ base: 3, sm: 2 }}
+                                                                    >
+                                                                        <Button
+                                                                            variant="light"
+                                                                            color="red"
+                                                                            fullWidth
+                                                                            onClick={() => {
+                                                                                const updated = [
+                                                                                    ...(form.values
+                                                                                        .pricingVariations ||
+                                                                                        []),
+                                                                                ];
+                                                                                updated.splice(
+                                                                                    index,
+                                                                                    1
+                                                                                );
+                                                                                form.setFieldValue(
+                                                                                    'pricingVariations',
+                                                                                    updated
+                                                                                );
+                                                                            }}
+                                                                            className="h-[36px] flex items-center justify-center p-0"
+                                                                        >
+                                                                            <HiOutlineTrash
+                                                                                size={18}
+                                                                            />
+                                                                        </Button>
+                                                                    </Grid.Col>
+                                                                </Grid>
+
+                                                                {/* Staff Specific Coupon Section */}
+                                                                {activeCoupons.length > 0 && (
+                                                                    <div className="border-t border-gray-100 pt-3">
+                                                                        <Switch
+                                                                            id={`variation-enable-coupons-${index}`}
+                                                                            label="Enable Coupons for this Staff"
+                                                                            size="sm"
+                                                                            mb="xs"
+                                                                            checked={
+                                                                                item.enableCoupons
+                                                                            }
+                                                                            onChange={(event) => {
+                                                                                const checked =
+                                                                                    event
+                                                                                        .currentTarget
+                                                                                        .checked;
+                                                                                form.setFieldValue(
+                                                                                    `pricingVariations.${index}.enableCoupons`,
+                                                                                    checked
+                                                                                );
+                                                                                if (
+                                                                                    checked &&
+                                                                                    (!item.coupons ||
+                                                                                        item.coupons
+                                                                                            .length ===
+                                                                                            0)
+                                                                                ) {
+                                                                                    const firstAvailable =
+                                                                                        activeCoupons[0];
+                                                                                    const nextCouponId =
+                                                                                        firstAvailable
+                                                                                            ? firstAvailable.id
+                                                                                            : '';
+                                                                                    form.setFieldValue(
+                                                                                        `pricingVariations.${index}.coupons`,
+                                                                                        [
+                                                                                            {
+                                                                                                couponId:
+                                                                                                    nextCouponId,
+                                                                                                amount: 0,
+                                                                                            },
+                                                                                        ]
+                                                                                    );
+                                                                                }
+                                                                            }}
+                                                                        />
+
+                                                                        {item.enableCoupons && (
+                                                                            <Stack
+                                                                                gap="xs"
+                                                                                className="mt-2 pl-4 border-l-2 border-indigo-50"
+                                                                            >
+                                                                                {item.coupons &&
+                                                                                item.coupons
+                                                                                    .length > 0 ? (
+                                                                                    <div className="flex flex-col gap-2">
+                                                                                        {item.coupons.map(
+                                                                                            (
+                                                                                                cItem,
+                                                                                                cIndex
+                                                                                            ) => {
+                                                                                                const selectedCouponIdsForStaff =
+                                                                                                    item.coupons
+                                                                                                        ?.map(
+                                                                                                            (
+                                                                                                                c
+                                                                                                            ) =>
+                                                                                                                c.couponId
+                                                                                                        )
+                                                                                                        .filter(
+                                                                                                            (
+                                                                                                                id
+                                                                                                            ) =>
+                                                                                                                id !==
+                                                                                                                cItem.couponId
+                                                                                                        ) ||
+                                                                                                    [];
+                                                                                                const availableCouponsForStaff =
+                                                                                                    activeCoupons.filter(
+                                                                                                        (
+                                                                                                            c
+                                                                                                        ) =>
+                                                                                                            !selectedCouponIdsForStaff.includes(
+                                                                                                                c.id
+                                                                                                            )
+                                                                                                    );
+
+                                                                                                return (
+                                                                                                    <Grid
+                                                                                                        key={
+                                                                                                            cIndex
+                                                                                                        }
+                                                                                                        align="flex-end"
+                                                                                                        gap="md"
+                                                                                                    >
+                                                                                                        <Grid.Col
+                                                                                                            span={{
+                                                                                                                base: 12,
+                                                                                                                sm: 6,
+                                                                                                            }}
+                                                                                                        >
+                                                                                                            <Select
+                                                                                                                id={`variation-coupon-select-${index}-${cIndex}`}
+                                                                                                                label="Coupon Code"
+                                                                                                                placeholder="Select a coupon"
+                                                                                                                required
+                                                                                                                data={availableCouponsForStaff.map(
+                                                                                                                    (
+                                                                                                                        c
+                                                                                                                    ) => ({
+                                                                                                                        value: c.id,
+                                                                                                                        label: c.code,
+                                                                                                                    })
+                                                                                                                )}
+                                                                                                                value={
+                                                                                                                    cItem.couponId
+                                                                                                                }
+                                                                                                                onChange={(
+                                                                                                                    val
+                                                                                                                ) => {
+                                                                                                                    if (
+                                                                                                                        val
+                                                                                                                    ) {
+                                                                                                                        form.setFieldValue(
+                                                                                                                            `pricingVariations.${index}.coupons.${cIndex}.couponId`,
+                                                                                                                            val
+                                                                                                                        );
+                                                                                                                    }
+                                                                                                                }}
+                                                                                                                styles={{
+                                                                                                                    label: labelStyles,
+                                                                                                                }}
+                                                                                                            />
+                                                                                                        </Grid.Col>
+                                                                                                        <Grid.Col
+                                                                                                            span={{
+                                                                                                                base: 9,
+                                                                                                                sm: 4,
+                                                                                                            }}
+                                                                                                        >
+                                                                                                            <NumberInput
+                                                                                                                id={`variation-coupon-amount-${index}-${cIndex}`}
+                                                                                                                label="Discount Price / Value ($)"
+                                                                                                                placeholder="e.g. 10"
+                                                                                                                min={
+                                                                                                                    1
+                                                                                                                }
+                                                                                                                allowDecimal={
+                                                                                                                    false
+                                                                                                                }
+                                                                                                                hideControls
+                                                                                                                required
+                                                                                                                value={
+                                                                                                                    cItem.amount
+                                                                                                                }
+                                                                                                                onChange={(
+                                                                                                                    val
+                                                                                                                ) => {
+                                                                                                                    form.setFieldValue(
+                                                                                                                        `pricingVariations.${index}.coupons.${cIndex}.amount`,
+                                                                                                                        typeof val ===
+                                                                                                                            'number'
+                                                                                                                            ? val
+                                                                                                                            : 0
+                                                                                                                    );
+                                                                                                                }}
+                                                                                                                styles={{
+                                                                                                                    label: labelStyles,
+                                                                                                                }}
+                                                                                                            />
+                                                                                                        </Grid.Col>
+                                                                                                        <Grid.Col
+                                                                                                            span={{
+                                                                                                                base: 3,
+                                                                                                                sm: 2,
+                                                                                                            }}
+                                                                                                        >
+                                                                                                            <Button
+                                                                                                                variant="light"
+                                                                                                                color="red"
+                                                                                                                fullWidth
+                                                                                                                disabled={
+                                                                                                                    item
+                                                                                                                        .coupons
+                                                                                                                        .length ===
+                                                                                                                    1
+                                                                                                                }
+                                                                                                                onClick={() => {
+                                                                                                                    const updatedCoupons =
+                                                                                                                        [
+                                                                                                                            ...(item.coupons ||
+                                                                                                                                []),
+                                                                                                                        ];
+                                                                                                                    updatedCoupons.splice(
+                                                                                                                        cIndex,
+                                                                                                                        1
+                                                                                                                    );
+                                                                                                                    form.setFieldValue(
+                                                                                                                        `pricingVariations.${index}.coupons`,
+                                                                                                                        updatedCoupons
+                                                                                                                    );
+                                                                                                                }}
+                                                                                                                className="h-[36px] flex items-center justify-center p-0"
+                                                                                                            >
+                                                                                                                <HiOutlineTrash
+                                                                                                                    size={
+                                                                                                                        18
+                                                                                                                    }
+                                                                                                                />
+                                                                                                            </Button>
+                                                                                                        </Grid.Col>
+                                                                                                    </Grid>
+                                                                                                );
+                                                                                            }
+                                                                                        )}
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <span className="text-center p-6 text-sm text-gray-600 bg-gray-50 rounded border border-dashed border-gray-200">
+                                                                                        No coupons
+                                                                                        configured
+                                                                                        for this
+                                                                                        staff. Click
+                                                                                        below to add
+                                                                                        one.
+                                                                                    </span>
+                                                                                )}
+
+                                                                                <Button
+                                                                                    variant="outline"
+                                                                                    color="indigo"
+                                                                                    size="xs"
+                                                                                    disabled={
+                                                                                        item.coupons &&
+                                                                                        item.coupons
+                                                                                            .length >=
+                                                                                            activeCoupons.length
+                                                                                    }
+                                                                                    onClick={() => {
                                                                                         const selectedCouponIdsForStaff =
-                                                                                            item.coupons
-                                                                                                ?.map(
-                                                                                                    (
-                                                                                                        c
-                                                                                                    ) =>
-                                                                                                        c.couponId
-                                                                                                )
-                                                                                                .filter(
-                                                                                                    (
-                                                                                                        id
-                                                                                                    ) =>
-                                                                                                        id !==
-                                                                                                        cItem.couponId
-                                                                                                ) ||
-                                                                                            [];
-                                                                                        const availableCouponsForStaff =
-                                                                                            activeCoupons.filter(
+                                                                                            item.coupons?.map(
+                                                                                                (
+                                                                                                    c
+                                                                                                ) =>
+                                                                                                    c.couponId
+                                                                                            ) || [];
+                                                                                        const firstAvailable =
+                                                                                            activeCoupons.find(
                                                                                                 (
                                                                                                     c
                                                                                                 ) =>
@@ -889,243 +1083,84 @@ export default function EditServicePage() {
                                                                                                         c.id
                                                                                                     )
                                                                                             );
-
-                                                                                        return (
-                                                                                            <Grid
-                                                                                                key={
-                                                                                                    cIndex
-                                                                                                }
-                                                                                                align="flex-end"
-                                                                                                gap="md"
-                                                                                            >
-                                                                                                <Grid.Col
-                                                                                                    span={{
-                                                                                                        base: 12,
-                                                                                                        sm: 6,
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <Select
-                                                                                                        id={`variation-coupon-select-${index}-${cIndex}`}
-                                                                                                        label="Coupon Code"
-                                                                                                        placeholder="Select a coupon"
-                                                                                                        required
-                                                                                                        data={availableCouponsForStaff.map(
-                                                                                                            (
-                                                                                                                c
-                                                                                                            ) => ({
-                                                                                                                value: c.id,
-                                                                                                                label: c.code,
-                                                                                                            })
-                                                                                                        )}
-                                                                                                        value={
-                                                                                                            cItem.couponId
-                                                                                                        }
-                                                                                                        onChange={(
-                                                                                                            val
-                                                                                                        ) => {
-                                                                                                            if (
-                                                                                                                val
-                                                                                                            ) {
-                                                                                                                form.setFieldValue(
-                                                                                                                    `pricingVariations.${index}.coupons.${cIndex}.couponId`,
-                                                                                                                    val
-                                                                                                                );
-                                                                                                            }
-                                                                                                        }}
-                                                                                                        styles={{
-                                                                                                            label: labelStyles,
-                                                                                                        }}
-                                                                                                    />
-                                                                                                </Grid.Col>
-                                                                                                <Grid.Col
-                                                                                                    span={{
-                                                                                                        base: 9,
-                                                                                                        sm: 4,
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <NumberInput
-                                                                                                        id={`variation-coupon-amount-${index}-${cIndex}`}
-                                                                                                        label="Discount Price / Value ($)"
-                                                                                                        placeholder="e.g. 10"
-                                                                                                        min={
-                                                                                                            1
-                                                                                                        }
-                                                                                                        allowDecimal={
-                                                                                                            false
-                                                                                                        }
-                                                                                                        hideControls
-                                                                                                        required
-                                                                                                        value={
-                                                                                                            cItem.amount
-                                                                                                        }
-                                                                                                        onChange={(
-                                                                                                            val
-                                                                                                        ) => {
-                                                                                                            form.setFieldValue(
-                                                                                                                `pricingVariations.${index}.coupons.${cIndex}.amount`,
-                                                                                                                typeof val ===
-                                                                                                                    'number'
-                                                                                                                    ? val
-                                                                                                                    : 0
-                                                                                                            );
-                                                                                                        }}
-                                                                                                        styles={{
-                                                                                                            label: labelStyles,
-                                                                                                        }}
-                                                                                                    />
-                                                                                                </Grid.Col>
-                                                                                                <Grid.Col
-                                                                                                    span={{
-                                                                                                        base: 3,
-                                                                                                        sm: 2,
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <Button
-                                                                                                        variant="light"
-                                                                                                        color="red"
-                                                                                                        fullWidth
-                                                                                                        disabled={
-                                                                                                            item
-                                                                                                                .coupons
-                                                                                                                .length ===
-                                                                                                            1
-                                                                                                        }
-                                                                                                        onClick={() => {
-                                                                                                            const updatedCoupons =
-                                                                                                                [
-                                                                                                                    ...(item.coupons ||
-                                                                                                                        []),
-                                                                                                                ];
-                                                                                                            updatedCoupons.splice(
-                                                                                                                cIndex,
-                                                                                                                1
-                                                                                                            );
-                                                                                                            form.setFieldValue(
-                                                                                                                `pricingVariations.${index}.coupons`,
-                                                                                                                updatedCoupons
-                                                                                                            );
-                                                                                                        }}
-                                                                                                        className="h-[36px] flex items-center justify-center p-0"
-                                                                                                    >
-                                                                                                        <HiOutlineTrash
-                                                                                                            size={
-                                                                                                                18
-                                                                                                            }
-                                                                                                        />
-                                                                                                    </Button>
-                                                                                                </Grid.Col>
-                                                                                            </Grid>
+                                                                                        const nextCouponId =
+                                                                                            firstAvailable
+                                                                                                ? firstAvailable.id
+                                                                                                : '';
+                                                                                        const currentCoupons =
+                                                                                            item.coupons ||
+                                                                                            [];
+                                                                                        form.setFieldValue(
+                                                                                            `pricingVariations.${index}.coupons`,
+                                                                                            [
+                                                                                                ...currentCoupons,
+                                                                                                {
+                                                                                                    couponId:
+                                                                                                        nextCouponId,
+                                                                                                    amount: 0,
+                                                                                                },
+                                                                                            ]
                                                                                         );
-                                                                                    }
-                                                                                )}
-                                                                            </div>
-                                                                        ) : (
-                                                                            <span className="text-center p-6 text-sm text-gray-600 bg-gray-50 rounded border border-dashed border-gray-200">
-                                                                                No coupons
-                                                                                configured for this
-                                                                                staff. Click below
-                                                                                to add one.
-                                                                            </span>
+                                                                                    }}
+                                                                                    className="mt-1 self-start w-fit"
+                                                                                >
+                                                                                    Add Coupon
+                                                                                </Button>
+                                                                            </Stack>
                                                                         )}
-
-                                                                        <Button
-                                                                            variant="outline"
-                                                                            color="indigo"
-                                                                            size="xs"
-                                                                            disabled={
-                                                                                item.coupons &&
-                                                                                item.coupons
-                                                                                    .length >=
-                                                                                    activeCoupons.length
-                                                                            }
-                                                                            onClick={() => {
-                                                                                const selectedCouponIdsForStaff =
-                                                                                    item.coupons?.map(
-                                                                                        (c) =>
-                                                                                            c.couponId
-                                                                                    ) || [];
-                                                                                const firstAvailable =
-                                                                                    activeCoupons.find(
-                                                                                        (c) =>
-                                                                                            !selectedCouponIdsForStaff.includes(
-                                                                                                c.id
-                                                                                            )
-                                                                                    );
-                                                                                const nextCouponId =
-                                                                                    firstAvailable
-                                                                                        ? firstAvailable.id
-                                                                                        : '';
-                                                                                const currentCoupons =
-                                                                                    item.coupons ||
-                                                                                    [];
-                                                                                form.setFieldValue(
-                                                                                    `pricingVariations.${index}.coupons`,
-                                                                                    [
-                                                                                        ...currentCoupons,
-                                                                                        {
-                                                                                            couponId:
-                                                                                                nextCouponId,
-                                                                                            amount: 0,
-                                                                                        },
-                                                                                    ]
-                                                                                );
-                                                                            }}
-                                                                            className="mt-1 self-start w-fit"
-                                                                        >
-                                                                            Add Coupon
-                                                                        </Button>
-                                                                    </Stack>
+                                                                    </div>
                                                                 )}
                                                             </div>
-                                                        )}
-                                                    </div>
+                                                        );
+                                                    }
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <span className="text-center p-6 text-sm text-gray-600 flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                                                No staff-specific pricing configured. This service
+                                                will use the base price for all staff.
+                                            </span>
+                                        )}
+                                        <Button
+                                            variant="outline"
+                                            color="indigo"
+                                            size="sm"
+                                            disabled={
+                                                form.values.pricingVariations &&
+                                                form.values.pricingVariations.length >=
+                                                    allStaffs.length
+                                            }
+                                            onClick={() => {
+                                                const selectedStaffIds =
+                                                    form.values.pricingVariations?.map(
+                                                        (v) => v.staffId
+                                                    ) || [];
+                                                const firstAvailableStaff = allStaffs.find(
+                                                    (staff) => !selectedStaffIds.includes(staff.id)
                                                 );
-                                            })}
-                                        </div>
-                                    ) : (
-                                        <span className="text-center p-6 text-sm text-gray-600 flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
-                                            No staff-specific pricing configured. This service will
-                                            use the base price for all staff.
-                                        </span>
-                                    )}
-                                    <Button
-                                        variant="outline"
-                                        color="indigo"
-                                        size="sm"
-                                        disabled={
-                                            form.values.pricingVariations &&
-                                            form.values.pricingVariations.length >= allStaffs.length
-                                        }
-                                        onClick={() => {
-                                            const selectedStaffIds =
-                                                form.values.pricingVariations?.map(
-                                                    (v) => v.staffId
-                                                ) || [];
-                                            const firstAvailableStaff = allStaffs.find(
-                                                (staff) => !selectedStaffIds.includes(staff.id)
-                                            );
 
-                                            const nextStaffId = firstAvailableStaff
-                                                ? firstAvailableStaff.id
-                                                : '';
-                                            const currentVariations =
-                                                form.values.pricingVariations || [];
-                                            form.setFieldValue('pricingVariations', [
-                                                ...currentVariations,
-                                                {
-                                                    staffId: nextStaffId,
-                                                    price: form.values.price || 0,
-                                                    enableCoupons: false,
-                                                    coupons: [],
-                                                },
-                                            ]);
-                                        }}
-                                        className="mt-2 self-start w-fit"
-                                    >
-                                        Add Pricing Variation
-                                    </Button>
-                                </Stack>
-                            </Card>
+                                                const nextStaffId = firstAvailableStaff
+                                                    ? firstAvailableStaff.id
+                                                    : '';
+                                                const currentVariations =
+                                                    form.values.pricingVariations || [];
+                                                form.setFieldValue('pricingVariations', [
+                                                    ...currentVariations,
+                                                    {
+                                                        staffId: nextStaffId,
+                                                        price: form.values.price || 0,
+                                                        enableCoupons: false,
+                                                        coupons: [],
+                                                    },
+                                                ]);
+                                            }}
+                                            className="mt-2 self-start w-fit"
+                                        >
+                                            Add Pricing Variation
+                                        </Button>
+                                    </Stack>
+                                </Card>
+                            )}
 
                             <div className="flex justify-end gap-3">
                                 <Link href="/admin/services">
