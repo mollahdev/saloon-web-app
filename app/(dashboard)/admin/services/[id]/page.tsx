@@ -588,10 +588,11 @@ export default function EditServicePage() {
                                                                                 <NumberInput
                                                                                     id={`coupon-amount-${index}`}
                                                                                     label="Discount Price / Value ($)"
-                                                                                    placeholder="e.g. 10.00"
-                                                                                    min={0.01}
-                                                                                    decimalScale={2}
-                                                                                    fixedDecimalScale
+                                                                                    placeholder="e.g. 10"
+                                                                                    min={1}
+                                                                                    allowDecimal={
+                                                                                        false
+                                                                                    }
                                                                                     hideControls
                                                                                     required
                                                                                     value={
@@ -766,10 +767,9 @@ export default function EditServicePage() {
                                                                 <NumberInput
                                                                     id={`variation-price-${index}`}
                                                                     label="Custom Price ($)"
-                                                                    placeholder="e.g. 50.00"
-                                                                    min={0.01}
-                                                                    decimalScale={2}
-                                                                    fixedDecimalScale
+                                                                    placeholder="e.g. 50"
+                                                                    min={1}
+                                                                    allowDecimal={false}
                                                                     hideControls
                                                                     required
                                                                     value={item.price}
@@ -946,14 +946,13 @@ export default function EditServicePage() {
                                                                                                     <NumberInput
                                                                                                         id={`variation-coupon-amount-${index}-${cIndex}`}
                                                                                                         label="Discount Price / Value ($)"
-                                                                                                        placeholder="e.g. 10.00"
+                                                                                                        placeholder="e.g. 10"
                                                                                                         min={
-                                                                                                            0.01
+                                                                                                            1
                                                                                                         }
-                                                                                                        decimalScale={
-                                                                                                            2
+                                                                                                        allowDecimal={
+                                                                                                            false
                                                                                                         }
-                                                                                                        fixedDecimalScale
                                                                                                         hideControls
                                                                                                         required
                                                                                                         value={
