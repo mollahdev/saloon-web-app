@@ -20,7 +20,6 @@ export const serviceSchema = z.object({
                 couponId: z.string().uuid('Invalid coupon ID'),
                 amount: z
                     .number({ message: 'Amount is required' })
-                    .int('Amount must be a whole number')
                     .positive('Amount must be greater than 0'),
             })
         )
@@ -32,7 +31,6 @@ export const serviceSchema = z.object({
                 staffId: z.string().uuid('Invalid staff ID'),
                 price: z
                     .number({ message: 'Price is required' })
-                    .int('Price must be a whole number')
                     .positive('Price must be greater than 0'),
                 enableCoupons: z.boolean().optional().default(false),
                 coupons: z
@@ -41,7 +39,6 @@ export const serviceSchema = z.object({
                             couponId: z.string().uuid('Invalid coupon ID'),
                             amount: z
                                 .number({ message: 'Amount is required' })
-                                .int('Amount must be a whole number')
                                 .positive('Amount must be greater than 0'),
                         })
                     )
