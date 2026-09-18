@@ -199,6 +199,11 @@ export function PricingVariationsCard({
                             );
                         })}
                     </div>
+                ) : allStaffs.length === 0 ? (
+                    <span className="text-center p-6 text-sm text-gray-500 flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                        No staff members found. Add staff in the Staff module to configure custom
+                        pricing per stylist.
+                    </span>
                 ) : (
                     <span className="text-center p-6 text-sm text-gray-600 flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
                         No staff-specific pricing configured. This service will use the base price
@@ -209,11 +214,17 @@ export function PricingVariationsCard({
                     variant="outline"
                     color="indigo"
                     size="sm"
-                    disabled={pricingVariations.length >= allStaffs.length}
+                    disabled={
+                        allStaffs.length === 0 || pricingVariations.length >= allStaffs.length
+                    }
                     onClick={handleAddVariation}
                     className="mt-2 self-start w-fit"
                 >
-                    Add Pricing Variation
+                    {allStaffs.length === 0
+                        ? 'No Staff Available'
+                        : pricingVariations.length >= allStaffs.length
+                          ? 'All Staff Added'
+                          : 'Add Pricing Variation'}
                 </Button>
             </Stack>
         </Card>

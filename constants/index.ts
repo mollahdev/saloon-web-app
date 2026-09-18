@@ -53,3 +53,11 @@ export const DAY_OF_WEEK_OPTIONS = workingDayOptions.map((day) => ({
     value: day,
     label: day.charAt(0) + day.slice(1).toLowerCase(),
 }));
+
+export const SERVICE_DURATION_VALUES = [15, 30, 45, 60] as const;
+export type ServiceDuration = (typeof SERVICE_DURATION_VALUES)[number];
+
+export const SERVICE_DURATION_OPTIONS = SERVICE_DURATION_VALUES.map((duration) => ({
+    value: String(duration),
+    label: `${duration} Minutes`,
+}));

@@ -1,8 +1,9 @@
 'use client';
 
-import { Divider, TextInput, Textarea, NumberInput, Grid, Switch } from '@mantine/core';
+import { Divider, TextInput, Textarea, NumberInput, Select, Grid, Switch } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { ServiceValues } from '@/app/lib/validation/service';
+import { SERVICE_DURATION_OPTIONS, SERVICE_DURATION_VALUES } from '@/constants';
 import { labelStyles } from './label-styles';
 
 interface ServiceDetailsFormProps {
@@ -10,6 +11,20 @@ interface ServiceDetailsFormProps {
 }
 
 export function ServiceDetailsForm({ form }: ServiceDetailsFormProps) {
+    const isKnownDuration = (val: number) =>
+        (SERVICE_DURATION_VALUES as readonly number[]).includes(val);
+
+    const durationOptions =
+        form.values.duration && !isKnownDuration(form.values.duration)
+            ? [
+                  ...SERVICE_DURATION_OPTIONS,
+                  {
+                      value: String(form.values.duration),
+                      label: `${form.values.duration} Minutes`,
+                  },
+              ]
+            : SERVICE_DURATION_OPTIONS;
+
     return (
         <Grid gap="md">
             <Grid.Col span={{ base: 12 }}>
@@ -38,14 +53,17 @@ export function ServiceDetailsForm({ form }: ServiceDetailsFormProps) {
             </Grid.Col>
 
             <Grid.Col span={{ base: 12, sm: 6 }}>
-                <NumberInput
+                <Select
                     id="service-duration"
-                    label="Duration (Minutes)"
-                    placeholder="e.g. 30"
-                    min={1}
-                    allowDecimal={false}
+                    label="Duration"
+                    placeholder="Select duration"
+                    data={durationOptions}
+                    value={form.values.duration ? String(form.values.duration) : null}
+                    onChange={(val) => {
+                        form.setFieldValue('duration', val ? Number(val) : 0);
+                    }}
+                    error={form.errors.duration}
                     required
-                    {...form.getInputProps('duration')}
                     styles={{ label: labelStyles }}
                 />
             </Grid.Col>

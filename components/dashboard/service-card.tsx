@@ -52,7 +52,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
                 service.status === 'INACTIVE' ? 'opacity-80 hover:opacity-100' : ''
             }`}
         >
-            <Card.Section className="h-44 overflow-hidden relative">
+            <Card.Section className="h-80 overflow-hidden relative">
                 <img
                     src={service.image || DEFAULT_SALOON_IMAGE}
                     alt={service.name}

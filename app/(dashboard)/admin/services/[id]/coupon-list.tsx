@@ -131,11 +131,17 @@ export function CouponList({
                 variant="outline"
                 color="indigo"
                 size={addButtonSize}
-                disabled={coupons && coupons.length >= activeCoupons.length}
+                disabled={
+                    !activeCoupons.length || (coupons && coupons.length >= activeCoupons.length)
+                }
                 onClick={handleAddCoupon}
                 className="mt-2 self-start w-fit"
             >
-                Add Coupon
+                {!activeCoupons.length
+                    ? 'No Active Coupons'
+                    : coupons && coupons.length >= activeCoupons.length
+                      ? 'All Coupons Added'
+                      : 'Add Coupon'}
             </Button>
         </Stack>
     );

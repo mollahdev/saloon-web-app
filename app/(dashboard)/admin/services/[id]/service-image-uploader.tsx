@@ -44,7 +44,7 @@ export function ServiceImageUploader({
                     />
 
                     {imageUrl ? (
-                        <div className="relative rounded-lg overflow-hidden border border-gray-100 shadow-sm w-full h-44 bg-gray-50 flex items-center justify-center">
+                        <div className="relative rounded-lg overflow-hidden border border-gray-100 shadow-sm w-full h-80 bg-gray-50 flex items-center justify-center">
                             <img
                                 src={imageUrl}
                                 alt="Service Preview"

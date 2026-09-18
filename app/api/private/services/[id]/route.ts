@@ -171,6 +171,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             data: updatedService,
         });
     } catch (error: any) {
+        if (error.code === 'P2002') {
+            return NextResponse.json(
+                { message: 'A duplicate entry exists for staff pricing or coupon assignment' },
+                { status: 400 }
+            );
+        }
         return NextResponse.json(
             { message: error.message || 'Internal server error' },
             { status: 500 }
@@ -210,6 +216,12 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
             data: null,
         });
     } catch (error: any) {
+        if (error.code === 'P2003') {
+            return NextResponse.json(
+                { message: 'Cannot delete service because it is referenced by other records' },
+                { status: 409 }
+            );
+        }
         return NextResponse.json(
             { message: error.message || 'Internal server error' },
             { status: 500 }
