@@ -108,6 +108,27 @@ export function StaffCard({ staff, onEdit }: StaffCardProps) {
                             : staff.status.replace(/_/g, ' ')}
                     </Badge>
                 </Group>
+
+                {staff.specialties && staff.specialties.length > 0 && (
+                    <Group justify="center" gap={4} mt={4} wrap="wrap">
+                        {staff.specialties.slice(0, 3).map((s) => (
+                            <Badge
+                                key={s.id}
+                                size="xs"
+                                variant="outline"
+                                color="violet"
+                                className="font-medium"
+                            >
+                                {s.specialty.name}
+                            </Badge>
+                        ))}
+                        {staff.specialties.length > 3 && (
+                            <Text size="xs" c="dimmed" fw={500}>
+                                +{staff.specialties.length - 3} more
+                            </Text>
+                        )}
+                    </Group>
+                )}
             </Stack>
 
             <Divider my="md" variant="dashed" className="opacity-60" />

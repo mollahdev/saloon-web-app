@@ -14,4 +14,9 @@ export interface Profile {
     bio: string | null;
     createdAt: string;
     updatedAt: string;
+    specialties?: Array<{
+        id: string;
+        specialtyId: string;
+        specialty: { id: string; name: string };
+    }>;
 }

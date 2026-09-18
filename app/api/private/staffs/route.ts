@@ -33,6 +33,13 @@ export async function GET(request: Request) {
             omit: {
                 passwordHash: true,
             },
+            include: {
+                specialties: {
+                    include: {
+                        specialty: true,
+                    },
+                },
+            },
         });
 
         return NextResponse.json({

@@ -1,0 +1,21 @@
+model Specialty {
+  id        String          @id @default(uuid())
+  name      String          @unique @db.VarChar(255)
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+  users     UserSpecialty[]
+
+  @@map("specialties")
+}
+
+model UserSpecialty {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialtyId String    @map("specialty_id")
+  specialty   Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@unique([userId, specialtyId])
+  @@map("user_specialties")
+}

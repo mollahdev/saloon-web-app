@@ -28,6 +28,7 @@ export const updateStaffSchema = z.object({
         .min(6, 'Password must be at least 6 characters long')
         .optional()
         .or(z.literal('')),
+    specialtyIds: z.array(z.string()).optional(),
 });
 
 export type UpdateStaffValues = z.infer<typeof updateStaffSchema>;

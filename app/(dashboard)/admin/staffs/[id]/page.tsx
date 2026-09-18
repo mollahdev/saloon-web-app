@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -9,6 +9,7 @@ import {
     TextInput,
     Textarea,
     Select,
+    MultiSelect,
     Grid,
     Card,
     Text,
@@ -33,6 +34,7 @@ import {
     useUpdateStaffMutation,
     useSendResetPasswordLinkMutation,
 } from '@/app/lib/store/staffs/api';
+import { useGetSpecialtiesQuery } from '@/app/lib/store/specialties/api';
 import { updateStaffSchema, UpdateStaffValues } from '@/app/lib/validation/staff';
 import { STATUS } from '@/constants';
 import StaffDetailLoading from './loading';
@@ -53,10 +55,19 @@ export default function StaffDetailPage() {
     const staff = staffResponse?.data;
     const [updateStaff, { isLoading: isUpdating }] = useUpdateStaffMutation();
     const [sendResetLink, { isLoading: isSendingReset }] = useSendResetPasswordLinkMutation();
+    const { data: specialtiesResponse } = useGetSpecialtiesQuery();
 
     const accessToken = useAppSelector((state) => state.auth.accessToken);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+    // Build dropdown options from DB specialties (auto-seeded by the API)
+    const specialtyOptions = useMemo(() => {
+        return (specialtiesResponse?.data || []).map((s) => ({
+            value: s.id,
+            label: s.name,
+        }));
+    }, [specialtiesResponse]);
 
     const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -128,6 +139,7 @@ export default function StaffDetailPage() {
             role: 'MEMBER',
             status: 'PENDING_VERIFICATION',
             password: '',
+            specialtyIds: [],
         },
         validate: schemaResolver(updateStaffSchema),
     });
@@ -145,6 +157,7 @@ export default function StaffDetailPage() {
                 role: staff.role === 'OWNER' ? 'ADMIN' : staff.role,
                 status: staff.status || 'PENDING_VERIFICATION',
                 password: '',
+                specialtyIds: staff.specialties?.map((s) => s.specialtyId) || [],
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -378,6 +391,20 @@ export default function StaffDetailPage() {
                                             minRows={3}
                                             {...form.getInputProps('bio')}
                                             styles={{ label: labelStyles }}
+                                        />
+                                    </Grid.Col>
+
+                                    <Grid.Col span={{ base: 12 }}>
+                                        <MultiSelect
+                                            id="staff-specialties"
+                                            label="Specialties"
+                                            placeholder="Select specialties..."
+                                            data={specialtyOptions}
+                                            searchable
+                                            clearable
+                                            hidePickedOptions
+                                            styles={{ label: labelStyles }}
+                                            {...form.getInputProps('specialtyIds')}
                                         />
                                     </Grid.Col>
                                 </Grid>

@@ -25,6 +25,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             omit: {
                 passwordHash: true,
             },
+            include: {
+                specialties: {
+                    include: {
+                        specialty: true,
+                    },
+                },
+            },
         });
 
         if (!staff) {
@@ -103,11 +110,34 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             updateData.passwordHash = await bcrypt.hash(val.data.password, passwordSaltRounds);
         }
 
+        // Sync specialties if provided
+        if (val.data.specialtyIds) {
+            await prisma.userSpecialty.deleteMany({
+                where: { userId: id },
+            });
+
+            if (val.data.specialtyIds.length > 0) {
+                await prisma.userSpecialty.createMany({
+                    data: val.data.specialtyIds.map((specialtyId: string) => ({
+                        userId: id,
+                        specialtyId,
+                    })),
+                });
+            }
+        }
+
         const updatedStaff = await prisma.user.update({
             where: { id },
             data: updateData,
             omit: {
                 passwordHash: true,
+            },
+            include: {
+                specialties: {
+                    include: {
+                        specialty: true,
+                    },
+                },
             },
         });
 
