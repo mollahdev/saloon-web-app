@@ -63,12 +63,12 @@ export function StaffCard({ staff, onEdit }: StaffCardProps) {
         <Card
             padding="xl"
             radius="md"
-            className="relative transition-all duration-200 border border-gray-100 overflow-hidden hover:-translate-y-1 hover:shadow-lg bg-white group"
+            className="relative transition-all duration-200 border border-gray-100 overflow-hidden hover:-translate-y-1 hover:shadow-lg bg-white group h-full flex flex-col"
         >
             {/* Top Gradient Border */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-cyan-400" />
 
-            <Stack align="center" gap="sm" className="relative z-10">
+            <Stack align="center" gap="sm" className="relative z-10 flex-1 w-full">
                 <div className="relative mt-2">
                     <Avatar
                         src={staff.avatar}
@@ -131,71 +131,73 @@ export function StaffCard({ staff, onEdit }: StaffCardProps) {
                 )}
             </Stack>
 
-            <Divider my="md" variant="dashed" className="opacity-60" />
+            <div className="mt-auto w-full">
+                <Divider my="md" variant="dashed" className="opacity-60" />
 
-            <div className="flex flex-row items-center gap-1.5 w-full">
-                {staff.status === STATUS.PENDING_VERIFICATION ? (
-                    <Button
-                        variant="light"
-                        color="blue"
-                        size="sm"
-                        px={12}
-                        className="flex-initial h-9 transition-all hover:bg-blue-100 font-bold text-[13px]"
-                        onClick={() => onEdit(staff)}
-                    >
-                        Edit
-                    </Button>
-                ) : (
-                    <Link href={`/admin/staffs/${staff.id}`} className="flex-initial">
+                <div className="flex flex-row items-center gap-1.5 w-full">
+                    {staff.status === STATUS.PENDING_VERIFICATION ? (
                         <Button
                             variant="light"
                             color="blue"
                             size="sm"
                             px={12}
-                            className="h-9 transition-all hover:bg-blue-100 font-bold text-[13px]"
+                            className="flex-initial h-9 transition-all hover:bg-blue-100 font-bold text-[13px]"
+                            onClick={() => onEdit(staff)}
                         >
                             Edit
                         </Button>
-                    </Link>
-                )}
+                    ) : (
+                        <Link href={`/admin/staffs/${staff.id}`} className="flex-initial">
+                            <Button
+                                variant="light"
+                                color="blue"
+                                size="sm"
+                                px={12}
+                                className="h-9 transition-all hover:bg-blue-100 font-bold text-[13px]"
+                            >
+                                Edit
+                            </Button>
+                        </Link>
+                    )}
 
-                {staff.status === STATUS.PENDING_VERIFICATION ? (
-                    <Button
-                        disabled
-                        variant="light"
-                        color="teal"
-                        size="sm"
-                        px={6}
-                        className="flex-1 h-9 font-bold text-[13px]"
-                    >
-                        Schedule
-                    </Button>
-                ) : (
-                    <Link href={`/admin/schedule/${staff.id}`} className="flex-1">
+                    {staff.status === STATUS.PENDING_VERIFICATION ? (
                         <Button
+                            disabled
                             variant="light"
                             color="teal"
                             size="sm"
                             px={6}
-                            fullWidth
-                            className="h-9 transition-all hover:bg-teal-100 font-bold text-[13px]"
+                            className="flex-1 h-9 font-bold text-[13px]"
                         >
                             Schedule
                         </Button>
-                    </Link>
-                )}
+                    ) : (
+                        <Link href={`/admin/schedule/${staff.id}`} className="flex-1">
+                            <Button
+                                variant="light"
+                                color="teal"
+                                size="sm"
+                                px={6}
+                                fullWidth
+                                className="h-9 transition-all hover:bg-teal-100 font-bold text-[13px]"
+                            >
+                                Schedule
+                            </Button>
+                        </Link>
+                    )}
 
-                <Tooltip label="Delete Staff" withArrow>
-                    <ActionIcon
-                        variant="light"
-                        color="red"
-                        size="lg"
-                        className="h-9 w-9 transition-colors duration-200 hover:bg-red-100 shrink-0"
-                        onClick={handleDeleteClick}
-                    >
-                        <HiOutlineTrash size={18} strokeWidth={1.5} />
-                    </ActionIcon>
-                </Tooltip>
+                    <Tooltip label="Delete Staff" withArrow>
+                        <ActionIcon
+                            variant="light"
+                            color="red"
+                            size="lg"
+                            className="h-9 w-9 transition-colors duration-200 hover:bg-red-100 shrink-0"
+                            onClick={handleDeleteClick}
+                        >
+                            <HiOutlineTrash size={18} strokeWidth={1.5} />
+                        </ActionIcon>
+                    </Tooltip>
+                </div>
             </div>
         </Card>
     );
