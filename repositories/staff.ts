@@ -51,3 +51,39 @@ export const createStaff = async (props: CreateStaffProps) => {
 
     return newStaff;
 };
+
+export interface StylistItem {
+    id: string;
+    name: string;
+    position: string;
+    avatar: string | null;
+    bio: string | null;
+}
+
+export const getActiveStylists = async (): Promise<StylistItem[]> => {
+    try {
+        const stylists = await prisma.user.findMany({
+            where: {
+                status: STATUS.ACTIVE,
+                role: {
+                    not: 'OWNER',
+                },
+            },
+            select: {
+                id: true,
+                name: true,
+                position: true,
+                avatar: true,
+                bio: true,
+            },
+            orderBy: {
+                name: 'asc',
+            },
+        });
+
+        return stylists;
+    } catch (error) {
+        console.error('Error fetching active stylists:', error);
+        return [];
+    }
+};

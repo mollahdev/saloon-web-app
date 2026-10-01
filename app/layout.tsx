@@ -1,7 +1,7 @@
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Barlow } from 'next/font/google';
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
 import { cookies } from 'next/headers';
 /**
@@ -30,6 +30,12 @@ const geistMono = Geist_Mono({
     subsets: ['latin'],
 });
 
+const barlow = Barlow({
+    variable: '--font-barlow',
+    subsets: ['latin'],
+    weight: ['400', '500', '600', '700'],
+});
+
 export default async function RootLayout({
     children,
 }: Readonly<{
@@ -43,7 +49,9 @@ export default async function RootLayout({
             <head>
                 <ColorSchemeScript />
             </head>
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+            <body
+                className={`${geistSans.variable} ${geistMono.variable} ${barlow.variable} antialiased`}
+            >
                 <StoreProvider>
                     <MantineProvider theme={theme}>
                         <ToasterProvider />
